@@ -15,7 +15,7 @@ func main() {
 	router.HandleFunc("GET /", handleIndex)
 
 	server := http.Server{
-		Addr: "8080",
+		Addr:    "8080",
 		Handler: middleware.Logging(router),
 	}
 	server.ListenAndServe()
