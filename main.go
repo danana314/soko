@@ -1,10 +1,10 @@
 package main
 
 import (
-	"1008001/splitwiser/middleware"
 	"html/template"
-	"log"
 	"net/http"
+
+	"github.com/urfave/negroni"
 )
 
 var templates = template.Must(template.ParseGlob("templates/*.tmpl"))
@@ -101,9 +101,12 @@ func main() {
 		renderTemplate(w, "display", page.Data)
 	})
 
-	server := http.Server{
+	n := negroni.Classic() // default middleware: panic recovery, logger, static serving
+	n.UseHandler(router)
+	server := &http.Server{
 		Addr:    "localhost:8080",
-		Handler: middleware.Logging(router),
+		Handler: n,
 	}
-	log.Fatal(server.ListenAndServe())
+
+	server.ListenAndServe()
 }
