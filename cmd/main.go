@@ -1,6 +1,8 @@
 package main
 
 import (
+	"1008001/splitwiser/internal/utilities"
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -16,40 +18,11 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data any) {
 	}
 }
 
-type Contact struct {
-	Name  string
-	Email string
-}
-
-func newContact(name, email string) Contact {
-	return Contact{
-		Name:  name,
-		Email: email,
-	}
-}
-
-type Contacts = []Contact
-
 type Data struct {
-	Contacts Contacts
-}
-
-func (d *Data) hasEmail(email string) bool {
-	for _, contact := range d.Contacts {
-		if contact.Email == email {
-			return true
-		}
-	}
-	return false
 }
 
 func newData() Data {
-	return Data{
-		Contacts: []Contact{
-			newContact("John", "jd@gmail.com"),
-			newContact("Clara", "cd@gmail.com"),
-		},
-	}
+	return Data{}
 }
 
 type FormData struct {
@@ -81,24 +54,19 @@ func main() {
 
 	page := newPage()
 	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		renderTemplate(w, "index", page)
+		renderTemplate(w, "index", nil)
 	})
 
-	router.HandleFunc("POST /contacts", func(w http.ResponseWriter, r *http.Request) {
-		name := r.FormValue("name")
-		email := r.FormValue("email")
-		if page.Data.hasEmail(email) {
-			formData := newFormData()
-			formData.Values["name"] = name
-			formData.Values["email"] = email
-			formData.Errors["email"] = "Email already exists"
+	router.HandleFunc("POST /t/new", func(w http.ResponseWriter, r *http.Request) {
+		id := utilities.NewId()
+		fmt.Println(id)
+		renderTemplate(w, "trip", page)
+	})
 
-			// renderTemplate(w, http.StatusUnprocessableEntity, "form", formData)
-			http.Error(w, "email already exists", http.StatusUnprocessableEntity)
-			return
-		}
-		page.Data.Contacts = append(page.Data.Contacts, newContact(name, email))
-		renderTemplate(w, "display", page.Data)
+	router.HandleFunc("GET /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("tripId")
+		fmt.Println(id)
+		renderTemplate(w, "trip", page)
 	})
 
 	n := negroni.Classic() // default middleware: panic recovery, logger, static serving

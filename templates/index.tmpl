@@ -9,15 +9,17 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.5/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
-    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"> -->
   </head>
   <body>
-    <div class="flex justify-center text-6xl">tripwiser</div>
-    <form hx-swap="outerHTML" hx-target="#contacts" hx-post="/contacts">
-      <label for="name">Name: </label>
-      <input class="input input-bordered w-full max-w-xs" type="text" name="name" placeholder="Name">
-      <button class="btn btn-neutral" type="submit">Create trip</button>
-    </form>
+    <div class="flex flex-col">
+      <div class="flex justify-center text-4xl">tripwiser</div>
+      <br/>
+      <div class="flex justify-center">
+        <form action="/t/new" method="post">
+          <button class="btn btn-neutral" type="submit">new trip</button>
+        </form>
+      </div>
+    </div>
   </body>
 </html>
 {{ end }}
