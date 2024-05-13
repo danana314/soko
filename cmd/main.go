@@ -18,55 +18,53 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data any) {
 	}
 }
 
-type Data struct {
-}
+// type Data struct {
+// }
 
-func newData() Data {
-	return Data{}
-}
+// func newData() Data {
+// 	return Data{}
+// }
 
-type FormData struct {
-	Values map[string]string
-	Errors map[string]string
-}
+// type FormData struct {
+// 	Values map[string]string
+// 	Errors map[string]string
+// }
 
-func newFormData() FormData {
-	return FormData{
-		Values: make(map[string]string),
-		Errors: make(map[string]string),
-	}
-}
+// func newFormData() FormData {
+// 	return FormData{
+// 		Values: make(map[string]string),
+// 		Errors: make(map[string]string),
+// 	}
+// }
 
-type Page struct {
-	Data Data
-	Form FormData
-}
+// type Page struct {
+// 	Data Data
+// 	Form FormData
+// }
 
-func newPage() Page {
-	return Page{
-		Data: newData(),
-		Form: newFormData(),
-	}
-}
+// func newPage() Page {
+// 	return Page{
+// 		Data: newData(),
+// 		Form: newFormData(),
+// 	}
+// }
 
 func main() {
 	router := http.NewServeMux()
 
-	page := newPage()
 	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(w, "index", nil)
 	})
 
 	router.HandleFunc("POST /t/new", func(w http.ResponseWriter, r *http.Request) {
 		id := utilities.NewId()
-		fmt.Println(id)
-		renderTemplate(w, "trip", page)
+		http.Redirect(w, r, fmt.Sprintf("/t/%s", id), http.StatusSeeOther)
 	})
 
 	router.HandleFunc("GET /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("tripId")
 		fmt.Println(id)
-		renderTemplate(w, "trip", page)
+		renderTemplate(w, "trip", id)
 	})
 
 	n := negroni.Classic() // default middleware: panic recovery, logger, static serving
