@@ -9,7 +9,7 @@ import (
 	"github.com/urfave/negroni"
 )
 
-var templates = template.Must(template.ParseGlob("templates/*.tmpl"))
+var templates = template.Must(template.ParseGlob("web/templates/*.tmpl"))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data any) {
 	err := templates.ExecuteTemplate(w, tmpl, data)
