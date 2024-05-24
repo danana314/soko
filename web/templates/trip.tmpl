@@ -11,7 +11,7 @@
     <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
   </head>
   <body>
-    <h1>Welcome to Trip {{ . }}</h1>
+    <h1>Welcome to Trip {{ .Id }}</h1>
     
     <div
       x-data="{
@@ -72,6 +72,9 @@
 Trip Overview <br/>
 Name: <br/>
 Type: [trip | home | couple | other] <br/>
+Start: {{ .StartDt }} <br/>
+End: {{ .EndDt }} <br/>
+Friends: {{ .Users }} <br/>
 {{ end }}
 
 {{ block "schedule" . }}
