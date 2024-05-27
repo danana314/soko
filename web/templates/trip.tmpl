@@ -70,15 +70,14 @@
 
 {{ block "trip_overview" . }}
   <div class="text-left">
-    Trip Overview <br/>
-    Name: <br/>
-    Type: {{ .Type }} <br/>
-    Start: {{ .StartDate }} <br/>
-    End: {{ .EndDate }} <br/>
+    Trip name: <br/>
+    Type: {{.Type}} <br/>
+    Start: <input type="date" value="{{.StartDate}}"/><br/>
+    End: <input type="date" value="{{.EndDate}}"/><br/>
     Friends: <br/>
     <ul class="list-inside list-['🧑']">
-      {{ range $val := .Users }}
-      <li>{{$val.Name}}</li>
+      {{ range .Users }}
+      <li>{{.Name}}</li>
     {{ end }}
     </ul>
   </div>
@@ -86,27 +85,27 @@
 {{ end }}
 
 {{block "schedule" .}}
-Who's coming when
-<div class="overflow-x-auto">
-  <table class="table table-zebra table-xs table-pin-rows table-pin-cols">
-    <thead>
-      <th scope="col"></th>
-      {{range .Users}}
-      <th scope="col">{{.Name}}</th>
-      {{ end }}
-    </thead>
-    <tbody>
-      {{range $date := .Dates}}
-      <tr>
-        <th scope="row">{{.}}</th>
-        {{range $user := $.Users}}
-        <td><input type="checkbox" name="user{{$user.Id}}_{{$date}}"></td>
+  Who's coming when
+  <div class="overflow-x-auto">
+    <table class="table table-zebra table-xs table-pin-rows table-pin-cols">
+      <thead>
+        <th scope="col"></th>
+        {{range .Users}}
+        <th scope="col">{{.Name}}</th>
+        {{ end }}
+      </thead>
+      <tbody>
+        {{range $date := .Dates}}
+        <tr>
+          <th scope="row">{{.}}</th>
+          {{range $user := $.Users}}
+          <td><input type="checkbox" name="user{{$user.Id}}_{{$date}}"></td>
+          {{end}}
+        </tr>
         {{end}}
-      </tr>
-      {{end}}
-    </tbody>
-  </table>
-</div>
+      </tbody>
+    </table>
+  </div>
 {{end}}
 
 {{block "packing_list" .}}

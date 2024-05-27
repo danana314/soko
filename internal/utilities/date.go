@@ -15,7 +15,7 @@ func NewDate(year int, month time.Month, day int) Date {
 }
 
 func (d Date) String() string {
-	return d.Format("2006/01/02")
+	return d.Format("2006-01-02")
 }
 
 func Range(d1 Date, d2 Date) []Date {
