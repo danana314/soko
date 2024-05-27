@@ -7,7 +7,6 @@ import (
 )
 
 type Store struct {
-	Users []models.User
 	Trips []models.Trip
 }
 
@@ -28,15 +27,19 @@ func Init() {
 			Name: "Will I Am",
 		},
 	}
+	startDate := utilities.NewDate(2024, time.January, 14)
+	endDate := utilities.NewDate(2024, time.February, 10)
+	dates := utilities.Range(startDate, endDate)
 	inMemStore = &Store{
-		Users: users,
 		Trips: []models.Trip{
 			{
-				Id:      "test",
-				Type:    models.TypeTrip,
-				Users:   users,
-				StartDt: utilities.NewDate(2024, time.January, 14),
-				EndDt:   utilities.NewDate(2024, time.February, 10),
+				Id:        "test",
+				Type:      models.TypeTrip,
+				Users:     users,
+				StartDate: startDate,
+				EndDate:   endDate,
+				Dates:     dates,
+				Schedule:  make([]models.ScheduleEntry, len(users)*len(utilities.Range(startDate, endDate))),
 			},
 		},
 	}
@@ -49,4 +52,14 @@ func GetTrip(tripId string) *models.Trip {
 		}
 	}
 	return nil
+}
+
+func GetScheduleEntryList(entries []models.ScheduleEntry, date utilities.Date, user string) []models.ScheduleEntry {
+	var resultList []models.ScheduleEntry
+	for _, entry := range entries {
+		if entry.Date == date && entry.User == user {
+			resultList = append(resultList, entry)
+		}
+	}
+	return resultList
 }

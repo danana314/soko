@@ -17,40 +17,17 @@ const (
 )
 
 type Trip struct {
-	Id      string
-	Type    string
-	Users   []User
-	StartDt utilities.Date
-	EndDt   utilities.Date
+	Id        string
+	Type      string
+	Users     []User
+	StartDate utilities.Date
+	EndDate   utilities.Date
+	Dates     []utilities.Date
+	Schedule  []ScheduleEntry
 }
 
-// type Data struct {
-// }
-
-// func newData() Data {
-// 	return Data{}
-// }
-
-// type FormData struct {
-// 	Values map[string]string
-// 	Errors map[string]string
-// }
-
-// func newFormData() FormData {
-// 	return FormData{
-// 		Values: make(map[string]string),
-// 		Errors: make(map[string]string),
-// 	}
-// }
-
-// type Page struct {
-// 	Data Data
-// 	Form FormData
-// }
-
-// func newPage() Page {
-// 	return Page{
-// 		Data: newData(),
-// 		Form: newFormData(),
-// 	}
-// }
+type ScheduleEntry struct {
+	Date   utilities.Date
+	User   string
+	Booked bool
+}

@@ -73,8 +73,8 @@
     Trip Overview <br/>
     Name: <br/>
     Type: {{ .Type }} <br/>
-    Start: {{ .StartDt }} <br/>
-    End: {{ .EndDt }} <br/>
+    Start: {{ .StartDate }} <br/>
+    End: {{ .EndDate }} <br/>
     Friends: <br/>
     <ul class="list-inside list-['🧑']">
       {{ range $val := .Users }}
@@ -85,14 +85,34 @@
   
 {{ end }}
 
-{{ block "schedule" . }}
+{{block "schedule" .}}
 Who's coming when
-{{ end }}
+<div class="overflow-x-auto">
+  <table class="table table-zebra table-xs table-pin-rows table-pin-cols">
+    <thead>
+      <th scope="col"></th>
+      {{range .Users}}
+      <th scope="col">{{.Name}}</th>
+      {{ end }}
+    </thead>
+    <tbody>
+      {{range $date := .Dates}}
+      <tr>
+        <th scope="row">{{.}}</th>
+        {{range $user := $.Users}}
+        <td><input type="checkbox" name="user{{$user.Id}}_{{$date}}"></td>
+        {{end}}
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}
 
-{{ block "packing_list" . }}
+{{block "packing_list" .}}
 Packing List
-{{ end }}
+{{end}}
 
-{{ block "expenses" . }}
+{{block "expenses" .}}
 Expenses
-{{ end }}
+{{end}}
