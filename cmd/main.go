@@ -10,10 +10,8 @@ import (
 	"github.com/urfave/negroni"
 )
 
-var templates = template.Must(template.ParseGlob("web/templates/*.tmpl"))
-
-func renderTemplate(w http.ResponseWriter, tmpl string, data any) {
-	err := templates.ExecuteTemplate(w, tmpl, data)
+func renderTemplate(t *template.Template, w http.ResponseWriter, tmpl string, data any) {
+	err := t.ExecuteTemplate(w, tmpl, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -21,10 +19,11 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data any) {
 
 func main() {
 	router := http.NewServeMux()
+	var templates = template.Must(template.ParseGlob("web/templates/*.tmpl"))
 	store.Init()
 
 	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		renderTemplate(w, "index", nil)
+		renderTemplate(templates, w, "index", nil)
 	})
 
 	router.HandleFunc("POST /t/new", func(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +34,7 @@ func main() {
 	router.HandleFunc("GET /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("tripId")
 		trip := store.GetTrip(id)
-		renderTemplate(w, "trip", trip)
+		renderTemplate(templates, w, "trip", trip)
 	})
 
 	n := negroni.Classic() // default middleware: panic recovery, logger, static serving

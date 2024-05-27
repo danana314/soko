@@ -2,6 +2,7 @@ package store
 
 import (
 	"1008001/splitwiser/internal/models"
+	"1008001/splitwiser/internal/utilities"
 	"time"
 )
 
@@ -31,10 +32,11 @@ func Init() {
 		Users: users,
 		Trips: []models.Trip{
 			{
-				Id:      "gRvBazHJZGSXeFqsjABtBy",
+				Id:      "test",
+				Type:    models.TypeTrip,
 				Users:   users,
-				StartDt: time.Date(2024, time.January, 14, 0, 0, 0, 0, time.UTC),
-				EndDt:   time.Date(2024, time.February, 10, 0, 0, 0, 0, time.UTC),
+				StartDt: utilities.NewDate(2024, time.January, 14),
+				EndDt:   utilities.NewDate(2024, time.February, 10),
 			},
 		},
 	}

@@ -1,7 +1,7 @@
 package models
 
 import (
-	"time"
+	"1008001/splitwiser/internal/utilities"
 )
 
 type User struct {
@@ -9,11 +9,19 @@ type User struct {
 	Name string
 }
 
+const (
+	TypeTrip   string = "Trip"
+	TypeHome   string = "Home"
+	TypeCouple string = "Couple"
+	TypeOther  string = "Other"
+)
+
 type Trip struct {
 	Id      string
+	Type    string
 	Users   []User
-	StartDt time.Time
-	EndDt   time.Time
+	StartDt utilities.Date
+	EndDt   utilities.Date
 }
 
 // type Data struct {

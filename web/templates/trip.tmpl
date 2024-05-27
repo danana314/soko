@@ -44,7 +44,7 @@
           <button :id="$id(tabId)" @click="tabButtonClicked($el);" type="button" :class="{ 'bg-gray-100 text-gray-700' : tabButtonActive($el) }" class="relative z-20 inline-flex items-center justify-center w-full h-8 px-3 text-sm font-medium transition-all rounded-md cursor-pointer whitespace-nowrap">Expenses</button>
           <div x-ref="tabMarker" class="absolute left-0 z-10 w-1/2 h-full duration-300 ease-out" x-cloak><div class="w-full h-full bg-gray-100 rounded-md shadow-sm"></div></div>
       </div>
-      <div class="relative flex items-center justify-center w-full p-5 mt-2 text-xs border rounded-md content border-gray-200/70">
+      <div class="relative flex items-center w-full p-5 mt-2 text-sm border rounded-md content border-gray-200/70">
         <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative">
           {{ template "trip_overview" . }}
         </div>  
@@ -69,12 +69,20 @@
 {{ end }}
 
 {{ block "trip_overview" . }}
-Trip Overview <br/>
-Name: <br/>
-Type: [trip | home | couple | other] <br/>
-Start: {{ .StartDt }} <br/>
-End: {{ .EndDt }} <br/>
-Friends: {{ .Users }} <br/>
+  <div class="text-left">
+    Trip Overview <br/>
+    Name: <br/>
+    Type: {{ .Type }} <br/>
+    Start: {{ .StartDt }} <br/>
+    End: {{ .EndDt }} <br/>
+    Friends: <br/>
+    <ul class="list-inside list-['🧑']">
+      {{ range $val := .Users }}
+      <li>{{$val.Name}}</li>
+    {{ end }}
+    </ul>
+  </div>
+  
 {{ end }}
 
 {{ block "schedule" . }}
