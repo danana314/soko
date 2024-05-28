@@ -11,7 +11,7 @@
     <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
   </head>
   <body>
-    <h1>Welcome to Trip {{ .Id }}</h1>
+    <h1>Welcome to Trip {{.Id}}</h1>
     
     <div
       x-data="{
@@ -33,9 +33,10 @@
               const tabId = tabContent.id.split('-').slice(-1);
               return this.tabSelected == tabId;
           }
-      }"
-      
-      x-init="tabRepositionMarker($refs.tabButtons.firstElementChild);" class="relative w-full max-w-sm">
+        }"
+      x-init="tabRepositionMarker($refs.tabButtons.firstElementChild);" 
+      class="relative w-full max-w-sm"
+      id="trip">
     
       <div x-ref="tabButtons" class="relative inline-grid items-center justify-center w-full h-10 grid-cols-4 p-1 text-gray-500 bg-white border border-gray-100 rounded-lg select-none">
           <button :id="$id(tabId)" @click="tabButtonClicked($el);" type="button" :class="{ 'bg-gray-100 text-gray-700' : tabButtonActive($el) }" class="relative z-20 inline-flex items-center justify-center w-full h-8 px-3 text-sm font-medium transition-all rounded-md cursor-pointer whitespace-nowrap">Overview</button>
@@ -69,18 +70,19 @@
 {{ end }}
 
 {{ block "trip_overview" . }}
-  <div class="text-left">
+  <form class="text-left" hx-post="/t/{{.Id}}" hx-target="#trip" hx-swap="outerHTML">
     Trip name: <br/>
     Type: {{.Type}} <br/>
-    Start: <input type="date" value="{{.StartDate}}"/><br/>
-    End: <input type="date" value="{{.EndDate}}"/><br/>
+    Start: <input type="date" name="StartDate" value="{{.StartDate}}"/><br/>
+    End: <input type="date" name="EndDate" value="{{.EndDate}}"/><br/>
     Friends: <br/>
     <ul class="list-inside list-['🧑']">
       {{ range .Users }}
       <li>{{.Name}}</li>
     {{ end }}
     </ul>
-  </div>
+    <button class="btn" type="submit">Update</button>
+  </form>
   
 {{ end }}
 

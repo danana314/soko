@@ -37,6 +37,13 @@ func main() {
 		renderTemplate(templates, w, "trip", trip)
 	})
 
+	router.HandleFunc("POST /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
+		startDate := r.FormValue("StartDate")
+		endDate := r.FormValue("EndDate")
+		fmt.Println(startDate)
+		fmt.Println(endDate)
+	})
+
 	n := negroni.Classic() // default middleware: panic recovery, logger, static serving
 	n.UseHandler(router)
 	server := &http.Server{
