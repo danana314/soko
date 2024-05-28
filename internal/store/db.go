@@ -3,7 +3,12 @@ package store
 import (
 	"1008001/splitwiser/internal/models"
 	"1008001/splitwiser/internal/utilities"
+	"database/sql"
+	"fmt"
+	"os"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Store struct {
@@ -13,6 +18,10 @@ type Store struct {
 var inMemStore *Store
 
 func Init() {
+	db, _ := sql.Open("sqlite3", "./foo.db")
+	defer db.Close()
+	os.Remove("/.foo.db")
+
 	users := []models.User{
 		{
 			Id:   1,
@@ -52,6 +61,10 @@ func GetTrip(tripId string) *models.Trip {
 		}
 	}
 	return nil
+}
+
+func UpdateTrip(trip *models.Trip) {
+	fmt.Println(trip)
 }
 
 func GetScheduleEntryList(entries []models.ScheduleEntry, date utilities.Date, user string) []models.ScheduleEntry {

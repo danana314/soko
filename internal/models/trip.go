@@ -18,6 +18,7 @@ const (
 
 type Trip struct {
 	Id        string
+	Name      string `schema:"TripName"`
 	Type      string
 	Users     []User
 	StartDate utilities.Date

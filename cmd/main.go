@@ -1,14 +1,18 @@
 package main
 
 import (
+	"1008001/splitwiser/internal/models"
 	"1008001/splitwiser/internal/store"
 	"1008001/splitwiser/internal/utilities"
 	"fmt"
 	"html/template"
 	"net/http"
 
+	"github.com/gorilla/schema"
 	"github.com/urfave/negroni"
 )
+
+var decoder = schema.NewDecoder()
 
 func renderTemplate(t *template.Template, w http.ResponseWriter, tmpl string, data any) {
 	err := t.ExecuteTemplate(w, tmpl, data)
@@ -38,10 +42,22 @@ func main() {
 	})
 
 	router.HandleFunc("POST /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
-		startDate := r.FormValue("StartDate")
-		endDate := r.FormValue("EndDate")
-		fmt.Println(startDate)
-		fmt.Println(endDate)
+		tripId := r.PathValue("tripId")
+		err := r.ParseForm()
+		if err != nil {
+			fmt.Println("Could not parse form")
+		}
+
+		trip := &models.Trip{}
+		trip.Id = tripId
+		err = decoder.Decode(trip, r.PostForm)
+		if err != nil {
+			fmt.Println(r.PostForm)
+			fmt.Println("Error decoding trip")
+			fmt.Println(err.Error())
+		}
+		store.UpdateTrip(trip)
+		renderTemplate(templates, w, "trip", trip)
 	})
 
 	n := negroni.Classic() // default middleware: panic recovery, logger, static serving

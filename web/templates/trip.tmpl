@@ -71,7 +71,10 @@
 
 {{ block "trip_overview" . }}
   <form class="text-left" hx-post="/t/{{.Id}}" hx-target="#trip" hx-swap="outerHTML">
-    Trip name: <br/>
+    <label for="TripName">Trip name: </label>
+    <input
+      {{ if .Name }} value="{{ .Name }}" {{ end }} 
+      type="text" name="TripName" placeholder="trip name"><br/>
     Type: {{.Type}} <br/>
     Start: <input type="date" name="StartDate" value="{{.StartDate}}"/><br/>
     End: <input type="date" name="EndDate" value="{{.EndDate}}"/><br/>
