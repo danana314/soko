@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -35,8 +36,8 @@ func Init() {
 			Name: "Will I Am",
 		},
 	}
-	startDate := utilities.NewDate("2024-01-14")
-	endDate := utilities.NewDate("2024-02-10")
+	startDate := utilities.NewDate(2024, time.January, 14)
+	endDate := utilities.NewDate(2024, time.February, 10)
 	dates := utilities.Range(startDate, endDate)
 	inMemStore = &Store{
 		Trips: []models.Trip{
@@ -62,9 +63,8 @@ func GetTrip(tripId string) *models.Trip {
 	return nil
 }
 
-func UpdateTrip(trip *models.Trip) *models.Trip {
+func UpdateTrip(trip *models.Trip) {
 	fmt.Println(trip)
-	return GetTrip(trip.Id)
 }
 
 func GetScheduleEntryList(entries []models.ScheduleEntry, date utilities.Date, user string) []models.ScheduleEntry {
