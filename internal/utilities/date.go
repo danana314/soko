@@ -1,38 +1,35 @@
 package utilities
 
 import (
+	"fmt"
 	"time"
 )
 
-type Date struct {
-	time.Time
-}
+type Date string
 
-func NewDate(year int, month time.Month, day int) Date {
-	d := Date{}
-	d.Time = time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
-	return d
-}
-
-func (d Date) String() string {
-	return d.Format("2006-01-02")
+func NewDate(dateStr string) Date {
+	if _, err := time.Parse("2006-01-02", dateStr); err != nil {
+		fmt.Println(err.Error())
+	}
+	return Date(dateStr)
 }
 
 func Range(d1 Date, d2 Date) []Date {
-	var startDate, endDate Date
-	if d1.Before(d2.Time) {
-		startDate = d1
-		endDate = d2
+	var startDate, endDate time.Time
+	d1dt, _ := time.Parse("2006-01-02", string(d1))
+	d2dt, _ := time.Parse("2006-01-02", string(d2))
+	if d1dt.Before(d2dt) {
+		startDate = d1dt
+		endDate = d2dt
 	} else {
-		startDate = d2
-		endDate = d1
+		startDate = d2dt
+		endDate = d1dt
 	}
-	diff := int(endDate.Sub(startDate.Time).Hours()/24) + 1
+	diff := int(endDate.Sub(startDate).Hours()/24) + 1
 	dates := make([]Date, diff)
 	for i := 0; i < diff; i++ {
-		nextDate := Date{}
-		nextDate.Time = startDate.AddDate(0, 0, i)
-		dates[i] = nextDate
+		nextDate := startDate.AddDate(0, 0, i)
+		dates[i] = Date(nextDate.String())
 	}
 	return dates
 }

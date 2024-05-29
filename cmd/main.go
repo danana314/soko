@@ -56,7 +56,7 @@ func main() {
 			fmt.Println("Error decoding trip")
 			fmt.Println(err.Error())
 		}
-		store.UpdateTrip(trip)
+		trip = store.UpdateTrip(trip)
 		renderTemplate(templates, w, "trip", trip)
 	})
 
