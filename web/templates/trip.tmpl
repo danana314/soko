@@ -12,8 +12,13 @@
   </head>
   <body>
     <h1>Welcome to Trip {{.Id}}</h1>
-    
-    <div
+    {{template "trip_detail" .}}
+  </body>
+</html>
+{{end}}
+
+{{block "trip_detail" .}}
+<div
       x-data="{
           tabSelected: 1,
           tabId: $id('tabs'),
@@ -65,12 +70,10 @@
       </div>
     </div>
 
-  </body>
-</html>
-{{ end }}
+{{end}}
 
-{{ block "trip_overview" . }}
-  <form class="text-left" hx-post="/t/{{.Id}}" hx-target="#trip" hx-swap="outerHTML">
+{{block "trip_overview" .}}
+  <form class="text-left" hx-post="/t/{{.Id}}" hx-target="#trip" hx-swap="innerHTML">
     <label for="TripName">Trip name: </label>
     <input
       {{ if .Name }} value="{{ .Name }}" {{ end }} 
@@ -80,14 +83,14 @@
     End: <input type="date" name="EndDate" value="{{.EndDate}}"/><br/>
     Friends: <br/>
     <ul class="list-inside list-['🧑']">
-      {{ range .Users }}
+      {{range .Users}}
       <li>{{.Name}}</li>
-    {{ end }}
+    {{end}}
     </ul>
     <button class="btn" type="submit">Update</button>
   </form>
   
-{{ end }}
+{{end}}
 
 {{block "schedule" .}}
   Who's coming when

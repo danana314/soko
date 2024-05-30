@@ -18,6 +18,11 @@ func (d Date) String() string {
 	return d.Format("2006-01-02")
 }
 
+func (d *Date) UnmarshalText(text []byte) (err error) {
+	d.Time, err = time.Parse("2006-01-02", string(text))
+	return
+}
+
 func Range(d1 Date, d2 Date) []Date {
 	var startDate, endDate Date
 	if d1.Before(d2.Time) {

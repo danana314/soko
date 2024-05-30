@@ -45,19 +45,18 @@ func main() {
 		tripId := r.PathValue("tripId")
 		err := r.ParseForm()
 		if err != nil {
-			fmt.Println("Could not parse form")
+			fmt.Println(err.Error())
 		}
 
 		trip := &models.Trip{}
 		trip.Id = tripId
 		err = decoder.Decode(trip, r.PostForm)
 		if err != nil {
-			fmt.Println(r.PostForm)
-			fmt.Println("Error decoding trip")
 			fmt.Println(err.Error())
+			fmt.Println(r.PostForm)
 		}
-		store.UpdateTrip(trip)
-		renderTemplate(templates, w, "trip", trip)
+		trip = store.UpdateTrip(trip)
+		renderTemplate(templates, w, "trip_detail", trip)
 	})
 
 	n := negroni.Classic() // default middleware: panic recovery, logger, static serving

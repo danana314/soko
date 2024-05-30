@@ -4,7 +4,6 @@ import (
 	"1008001/splitwiser/internal/models"
 	"1008001/splitwiser/internal/utilities"
 	"database/sql"
-	"fmt"
 	"os"
 	"time"
 
@@ -63,9 +62,13 @@ func GetTrip(tripId string) *models.Trip {
 	return nil
 }
 
-func UpdateTrip(trip *models.Trip) {
-	fmt.Println(trip)
+func UpdateTrip(newTrip *models.Trip) *models.Trip {
+	// currentTrip := GetTrip(newTrip.Id)
+
+	return GetTrip(newTrip.Id)
 }
+
+// func updateField(fieldOld T, field2 T)
 
 func GetScheduleEntryList(entries []models.ScheduleEntry, date utilities.Date, user string) []models.ScheduleEntry {
 	var resultList []models.ScheduleEntry
