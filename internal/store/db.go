@@ -3,8 +3,8 @@ package store
 import (
 	"1008001/splitwiser/internal/models"
 	"1008001/splitwiser/internal/utilities"
-	"database/sql"
-	"os"
+	_ "database/sql"
+	"fmt"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -17,9 +17,9 @@ type Store struct {
 var inMemStore *Store
 
 func Init() {
-	db, _ := sql.Open("sqlite3", "./foo.db")
-	defer db.Close()
-	os.Remove("/.foo.db")
+	// db, _ := sql.Open("sqlite3", "./foo.db")
+	// defer db.Close()
+	// os.Remove("/.foo.db")
 
 	users := []models.User{
 		{
@@ -63,12 +63,23 @@ func GetTrip(tripId string) *models.Trip {
 }
 
 func UpdateTrip(newTrip *models.Trip) *models.Trip {
-	// currentTrip := GetTrip(newTrip.Id)
+	activeTrip := GetTrip(newTrip.Id)
+	activeTrip.Name = newTrip.Name
+	activeTrip.Type = newTrip.Type
+	activeTrip.StartDate = newTrip.StartDate
+	activeTrip.EndDate = newTrip.EndDate
 
-	return GetTrip(newTrip.Id)
+	if activeTrip.StartDate != newTrip.StartDate || activeTrip.EndDate != newTrip.EndDate {
+		fmt.Println("dates updated. TODO - update list")
+	}
+
+	for ix, t := range inMemStore.Trips {
+		if t.Id == activeTrip.Id {
+			inMemStore.Trips[ix] = *activeTrip
+		}
+	}
+	return activeTrip
 }
-
-// func updateField(fieldOld T, field2 T)
 
 func GetScheduleEntryList(entries []models.ScheduleEntry, date utilities.Date, user string) []models.ScheduleEntry {
 	var resultList []models.ScheduleEntry
