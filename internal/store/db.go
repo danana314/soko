@@ -5,8 +5,10 @@ import (
 	"1008001/splitwiser/internal/utilities"
 	_ "database/sql"
 	"fmt"
+	"os"
 	"time"
 
+	"crawshaw.dev/jsonfile"
 	_ "modernc.org/sqlite"
 )
 
@@ -21,36 +23,46 @@ func Init() {
 	// defer db.Close()
 	// os.Remove("/.foo.db")
 
-	users := []models.User{
-		{
-			Id:   1,
-			Name: "John Smith",
-		},
-		{
-			Id:   2,
-			Name: "Jane Smith",
-		},
-		{
-			Id:   3,
-			Name: "Will I Am",
-		},
+	path := "./foo.db"
+	_, err := jsonfile.Load[Store](path)
+	if os.IsNotExist(err) {
+		db, err := jsonfile.New[Store](path)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		db.Write(func(s *Store) error {
+			users := []models.User{
+				{
+					Id:   1,
+					Name: "John Smith",
+				},
+				{
+					Id:   2,
+					Name: "Jane Smith",
+				},
+				{
+					Id:   3,
+					Name: "Will I Am",
+				},
+			}
+			startDate := utilities.NewDate(2024, time.January, 14)
+			endDate := utilities.NewDate(2024, time.February, 10)
+			dates := utilities.Range(startDate, endDate)
+			s.Trips = []models.Trip{
+				{
+					Id:        "test",
+					Type:      models.TypeTrip,
+					Users:     users,
+					StartDate: startDate,
+					EndDate:   endDate,
+					Dates:     dates,
+					Schedule:  make([]models.ScheduleEntry, len(users)*len(utilities.Range(startDate, endDate))),
+				},
+			}
+			return nil
+		})
 	}
-	startDate := utilities.NewDate(2024, time.January, 14)
-	endDate := utilities.NewDate(2024, time.February, 10)
-	dates := utilities.Range(startDate, endDate)
-	inMemStore = &Store{
-		Trips: []models.Trip{
-			{
-				Id:        "test",
-				Type:      models.TypeTrip,
-				Users:     users,
-				StartDate: startDate,
-				EndDate:   endDate,
-				Dates:     dates,
-				Schedule:  make([]models.ScheduleEntry, len(users)*len(utilities.Range(startDate, endDate))),
-			},
-		},
-	}
+
 }
 
 func GetTrip(tripId string) *models.Trip {
