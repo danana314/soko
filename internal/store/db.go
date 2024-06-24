@@ -4,7 +4,7 @@ import (
 	"1008001/splitwiser/internal/models"
 	"1008001/splitwiser/internal/utilities"
 	_ "database/sql"
-	"fmt"
+	"log/slog"
 	"os"
 	"time"
 
@@ -18,6 +18,12 @@ type Store struct {
 
 var inMemStore *Store
 
+func mustWrite[Data any](data *jsonfile.JSONFile[Data], fn func(db *Data)) {
+	if err := data.Write(func(db *Data) error { fn(db); return nil }); err != nil {
+		slog.Error(err.Error())
+	}
+}
+
 func Init() {
 	// db, _ := sql.Open("sqlite3", "./foo.db")
 	// defer db.Close()
@@ -28,7 +34,7 @@ func Init() {
 	if os.IsNotExist(err) {
 		db, err := jsonfile.New[Store](path)
 		if err != nil {
-			fmt.Println(err.Error())
+			slog.Error(err.Error())
 		}
 		db.Write(func(s *Store) error {
 			users := []models.User{
@@ -82,7 +88,7 @@ func UpdateTrip(newTrip *models.Trip) *models.Trip {
 	activeTrip.EndDate = newTrip.EndDate
 
 	if activeTrip.StartDate != newTrip.StartDate || activeTrip.EndDate != newTrip.EndDate {
-		fmt.Println("dates updated. TODO - update list")
+		slog.Info("dates updated. TODO - update list")
 	}
 
 	for ix, t := range inMemStore.Trips {

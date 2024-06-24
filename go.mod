@@ -3,6 +3,7 @@ module 1008001/splitwiser
 go 1.22.1
 
 require (
+	crawshaw.dev/jsonfile v0.0.0-20240206193014-699d1dad804e
 	github.com/gorilla/schema v1.3.0
 	github.com/lithammer/shortuuid/v4 v4.0.0
 	github.com/urfave/negroni v1.0.0
@@ -10,7 +11,6 @@ require (
 )
 
 require (
-	crawshaw.dev/jsonfile v0.0.0-20240206193014-699d1dad804e // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect

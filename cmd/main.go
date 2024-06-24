@@ -6,6 +6,7 @@ import (
 	"1008001/splitwiser/internal/utilities"
 	"fmt"
 	"html/template"
+	"log/slog"
 	"net/http"
 
 	"github.com/gorilla/schema"
@@ -45,15 +46,14 @@ func main() {
 		tripId := r.PathValue("tripId")
 		err := r.ParseForm()
 		if err != nil {
-			fmt.Println(err.Error())
+			slog.Error(err.Error())
 		}
 
 		trip := &models.Trip{}
 		trip.Id = tripId
 		err = decoder.Decode(trip, r.PostForm)
 		if err != nil {
-			fmt.Println(err.Error())
-			fmt.Println(r.PostForm)
+			slog.Error(err.Error(), "postform", r.PostForm)
 		}
 		trip = store.UpdateTrip(trip)
 		renderTemplate(templates, w, "trip_detail", trip)
