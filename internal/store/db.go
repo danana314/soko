@@ -16,23 +16,14 @@ type Store struct {
 	Trips []models.Trip
 }
 
-var inMemStore *Store
-
-func mustWrite[Data any](data *jsonfile.JSONFile[Data], fn func(db *Data)) {
-	if err := data.Write(func(db *Data) error { fn(db); return nil }); err != nil {
-		slog.Error(err.Error())
-	}
-}
+var db *jsonfile.JSONFile[Store]
 
 func Init() {
-	// db, _ := sql.Open("sqlite3", "./foo.db")
-	// defer db.Close()
-	// os.Remove("/.foo.db")
-
 	path := "./foo.db"
-	_, err := jsonfile.Load[Store](path)
+	var err error
+	db, err = jsonfile.Load[Store](path)
 	if os.IsNotExist(err) {
-		db, err := jsonfile.New[Store](path)
+		db, err = jsonfile.New[Store](path)
 		if err != nil {
 			slog.Error(err.Error())
 		}
@@ -72,12 +63,15 @@ func Init() {
 }
 
 func GetTrip(tripId string) *models.Trip {
-	for _, t := range inMemStore.Trips {
-		if t.Id == tripId {
-			return &t
+	var trip *models.Trip
+	db.Read(func(s *Store) {
+		for _, t := range s.Trips {
+			if t.Id == tripId {
+				trip = &t
+			}
 		}
-	}
-	return nil
+	})
+	return trip
 }
 
 func UpdateTrip(newTrip *models.Trip) *models.Trip {
