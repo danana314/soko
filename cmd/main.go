@@ -27,7 +27,7 @@ func main() {
 	var templates = template.Must(template.ParseGlob("web/templates/*.tmpl"))
 	store.Init()
 
-	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(templates, w, "index", nil)
 	})
 
