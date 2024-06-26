@@ -4,8 +4,11 @@ import (
 	"1008001/splitwiser/internal/models"
 	"1008001/splitwiser/internal/utilities"
 	_ "database/sql"
+	"errors"
+	"io/fs"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"time"
 
 	"crawshaw.dev/jsonfile"
@@ -19,10 +22,10 @@ type Store struct {
 var db *jsonfile.JSONFile[Store]
 
 func Init() {
-	path := "./foo.db"
+	path := filepath.Join(os.TempDir(), "db.json")
 	var err error
 	db, err = jsonfile.Load[Store](path)
-	if os.IsNotExist(err) {
+	if errors.Is(err, fs.ErrNotExist) {
 		db, err = jsonfile.New[Store](path)
 		if err != nil {
 			slog.Error(err.Error())
@@ -48,7 +51,6 @@ func Init() {
 			s.Trips = []models.Trip{
 				{
 					Id:        "test",
-					Type:      models.TypeTrip,
 					Users:     users,
 					StartDate: startDate,
 					EndDate:   endDate,
@@ -59,7 +61,6 @@ func Init() {
 			return nil
 		})
 	}
-
 }
 
 func GetTrip(tripId string) *models.Trip {
@@ -71,25 +72,38 @@ func GetTrip(tripId string) *models.Trip {
 			}
 		}
 	})
+	if trip == nil {
+		trip = new(models.Trip)
+		db.Write(func(s *Store) error {
+			s.Trips = append(s.Trips, *trip)
+			return nil
+		})
+	}
 	return trip
 }
 
-func UpdateTrip(newTrip *models.Trip) *models.Trip {
-	activeTrip := GetTrip(newTrip.Id)
-	activeTrip.Name = newTrip.Name
-	activeTrip.Type = newTrip.Type
-	activeTrip.StartDate = newTrip.StartDate
-	activeTrip.EndDate = newTrip.EndDate
+func UpdateTrip(updatedTrip *models.Trip) *models.Trip {
+	activeTrip := GetTrip(updatedTrip.Id)
+	activeTrip.Name = updatedTrip.Name
+	//users
+	activeTrip.StartDate = updatedTrip.StartDate
+	activeTrip.EndDate = updatedTrip.EndDate
+	//dates
+	//schedule
 
-	if activeTrip.StartDate != newTrip.StartDate || activeTrip.EndDate != newTrip.EndDate {
+	if activeTrip.StartDate != updatedTrip.StartDate || activeTrip.EndDate != updatedTrip.EndDate {
 		slog.Info("dates updated. TODO - update list")
 	}
 
-	for ix, t := range inMemStore.Trips {
-		if t.Id == activeTrip.Id {
-			inMemStore.Trips[ix] = *activeTrip
+	db.Write(func(s *Store) error {
+		for ix, t := range s.Trips {
+			if t.Id == activeTrip.Id {
+				s.Trips[ix] = *activeTrip
+			}
 		}
-	}
+		return nil
+	})
+
 	return activeTrip
 }
 

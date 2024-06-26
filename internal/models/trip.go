@@ -9,17 +9,9 @@ type User struct {
 	Name string
 }
 
-const (
-	TypeTrip   string = "Trip"
-	TypeHome   string = "Home"
-	TypeCouple string = "Couple"
-	TypeOther  string = "Other"
-)
-
 type Trip struct {
 	Id        string
 	Name      string `schema:"TripName"`
-	Type      string
 	Users     []User
 	StartDate utilities.Date
 	EndDate   utilities.Date
