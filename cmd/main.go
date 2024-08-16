@@ -33,12 +33,15 @@ func main() {
 
 	router.HandleFunc("POST /t/new", func(w http.ResponseWriter, r *http.Request) {
 		id := utilities.NewId()
+		//todo: create new trip here
+
 		http.Redirect(w, r, fmt.Sprintf("/t/%s", id), http.StatusSeeOther)
 	})
 
 	router.HandleFunc("GET /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("tripId")
 		trip := store.GetTrip(id)
+		//todo: return 'trip not found' on nil
 		renderTemplate(templates, w, "trip", trip)
 	})
 
