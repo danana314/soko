@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"crawshaw.dev/jsonfile"
+	"github.com/lithammer/shortuuid/v4"
 	_ "modernc.org/sqlite"
 )
 
@@ -63,6 +64,16 @@ func Init() {
 	}
 }
 
+func CreateNewTrip() string {
+	trip := new(models.Trip)
+	trip.Id = shortuuid.New()
+	db.Write(func(s *Store) error {
+		s.Trips = append(s.Trips, *trip)
+		return nil
+	})
+	return trip.Id
+}
+
 func GetTrip(tripId string) *models.Trip {
 	var trip *models.Trip
 	db.Read(func(s *Store) {
@@ -72,13 +83,6 @@ func GetTrip(tripId string) *models.Trip {
 			}
 		}
 	})
-	if trip == nil {
-		trip = new(models.Trip)
-		db.Write(func(s *Store) error {
-			s.Trips = append(s.Trips, *trip)
-			return nil
-		})
-	}
 	return trip
 }
 

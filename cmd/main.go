@@ -3,7 +3,6 @@ package main
 import (
 	"1008001/splitwiser/internal/models"
 	"1008001/splitwiser/internal/store"
-	"1008001/splitwiser/internal/utilities"
 	"fmt"
 	"html/template"
 	"log/slog"
@@ -32,17 +31,18 @@ func main() {
 	})
 
 	router.HandleFunc("POST /t/new", func(w http.ResponseWriter, r *http.Request) {
-		id := utilities.NewId()
-		//todo: create new trip here
-
+		id := store.CreateNewTrip()
 		http.Redirect(w, r, fmt.Sprintf("/t/%s", id), http.StatusSeeOther)
 	})
 
 	router.HandleFunc("GET /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("tripId")
 		trip := store.GetTrip(id)
-		//todo: return 'trip not found' on nil
-		renderTemplate(templates, w, "trip", trip)
+		if trip == nil {
+			http.Error(w, "trip not found", http.StatusNotFound)
+		} else {
+			renderTemplate(templates, w, "trip", trip)
+		}
 	})
 
 	router.HandleFunc("POST /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
