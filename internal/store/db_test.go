@@ -3,6 +3,7 @@ package store
 import (
 	"1008001/splitwiser/internal/models"
 	"1008001/splitwiser/internal/utilities"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -20,10 +21,12 @@ func TestGetTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if _, err = os.Stat(path); err == nil {
+		defer os.Remove(path)
+	}
 
 	startDate := utilities.NewDate(2024, time.January, 14)
 	endDate := utilities.NewDate(2024, time.January, 18)
-	dates := utilities.Range(startDate, endDate)
 	want := models.Trip{
 		Id: "test",
 		Users: []models.User{
@@ -42,7 +45,6 @@ func TestGetTrip(t *testing.T) {
 		},
 		StartDate: startDate,
 		EndDate:   endDate,
-		Dates:     dates,
 		Schedule:  make([]models.ScheduleEntry, 3*len(utilities.Range(startDate, endDate))),
 	}
 	sampleData := []models.Trip{want}
@@ -52,16 +54,18 @@ func TestGetTrip(t *testing.T) {
 		return nil
 	})
 
+	// check to see trip got added to db
 	got := GetTrip("test")
 	if !reflect.DeepEqual(*got, want) {
 		t.Errorf("got %+v, want %+v", *got, want)
 	}
 
-	got = GetTrip("new trip")
-	sampleData = append(sampleData, *got)
-	if !reflect.DeepEqual(got, new(models.Trip)) {
-		t.Errorf("got %+v, wanted new, empty trip", *got)
+	got = GetTrip("nonexistent trip")
+	if got != nil {
+		t.Errorf("got %+v, wanted nil", *got)
 	}
+
+	// check to see db is only what we added to it
 	db.Read(func(data *Store) {
 		if !reflect.DeepEqual(data.Trips, sampleData) {
 			t.Errorf("new trip not added to db")

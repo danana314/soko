@@ -48,19 +48,19 @@ func Init() {
 			}
 			startDate := utilities.NewDate(2024, time.January, 14)
 			endDate := utilities.NewDate(2024, time.February, 10)
-			dates := utilities.Range(startDate, endDate)
 			s.Trips = []models.Trip{
 				{
 					Id:        "test",
 					Users:     users,
 					StartDate: startDate,
 					EndDate:   endDate,
-					Dates:     dates,
 					Schedule:  make([]models.ScheduleEntry, len(users)*len(utilities.Range(startDate, endDate))),
 				},
 			}
 			return nil
 		})
+	} else if err != nil {
+		slog.Error(err.Error())
 	}
 }
 
@@ -114,7 +114,7 @@ func UpdateTrip(updatedTrip *models.Trip) *models.Trip {
 func GetScheduleEntryList(entries []models.ScheduleEntry, date utilities.Date, user string) []models.ScheduleEntry {
 	var resultList []models.ScheduleEntry
 	for _, entry := range entries {
-		if entry.Date == date && entry.User == user {
+		if entry.Date == date && entry.User.Name == user {
 			resultList = append(resultList, entry)
 		}
 	}

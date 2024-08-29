@@ -15,12 +15,20 @@ type Trip struct {
 	Users     []User
 	StartDate utilities.Date
 	EndDate   utilities.Date
-	Dates     []utilities.Date
 	Schedule  []ScheduleEntry
 }
 
 type ScheduleEntry struct {
 	Date   utilities.Date
-	User   string
+	User   User
 	Booked bool
+}
+
+func (t Trip) DateRange() []utilities.Date {
+	return utilities.Range(t.StartDate, t.EndDate)
+}
+
+func (t Trip) UpdateSchedule() []ScheduleEntry {
+	//todo: fill out
+	return nil
 }
