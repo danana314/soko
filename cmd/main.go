@@ -25,6 +25,13 @@ func main() {
 	router := http.NewServeMux()
 	var templates = template.Must(template.ParseGlob("web/templates/*.tmpl"))
 	store.Init()
+	// db, err := store.New("db.sqlite")
+	// if err != nil {
+	// trace := string(debug.Stack())
+	// slog.Error(err.Error(), "trace", trace)
+	// os.Exit(1)
+	// }
+	// defer db.Close()
 
 	router.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(templates, w, "index", nil)
@@ -58,8 +65,19 @@ func main() {
 		if err != nil {
 			slog.Error(err.Error(), "postform", r.PostForm)
 		}
-		trip = store.UpdateTrip(trip)
+		trip.UpdateTripDetails(trip)
+		store.UpdateTrip(trip)
 		renderTemplate(templates, w, "trip_detail", trip)
+	})
+
+	router.HandleFunc("POST /t/{tripId}/schedule", func(w http.ResponseWriter, r *http.Request) {
+		tripId := r.PathValue("tripId")
+		err := r.ParseForm()
+		if err != nil {
+			slog.Error(err.Error())
+		}
+		slog.Info(tripId)
+		slog.Info(fmt.Sprintf("%#v", r.PostForm))
 	})
 
 	n := negroni.Classic() // default middleware: panic recovery, logger, static serving

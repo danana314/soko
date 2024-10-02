@@ -32,7 +32,7 @@ func Range(d1 Date, d2 Date) []Date {
 		startDate = d2
 		endDate = d1
 	}
-	diff := int(endDate.Sub(startDate.Time).Hours()/24) + 1
+	diff := int(endDate.Sub(startDate.Time).Hours() / 24)
 	dates := make([]Date, diff)
 	for i := 0; i < diff; i++ {
 		nextDate := Date{}

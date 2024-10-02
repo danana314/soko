@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"time"
 
 	"crawshaw.dev/jsonfile"
 	"github.com/lithammer/shortuuid/v4"
@@ -31,34 +30,13 @@ func Init() {
 		if err != nil {
 			slog.Error(err.Error())
 		}
-		db.Write(func(s *Store) error {
-			users := []models.User{
-				{
-					Id:   1,
-					Name: "John Smith",
-				},
-				{
-					Id:   2,
-					Name: "Jane Smith",
-				},
-				{
-					Id:   3,
-					Name: "Will I Am",
-				},
-			}
-			startDate := utilities.NewDate(2024, time.January, 14)
-			endDate := utilities.NewDate(2024, time.February, 10)
-			s.Trips = []models.Trip{
-				{
-					Id:        "test",
-					Users:     users,
-					StartDate: startDate,
-					EndDate:   endDate,
-					Schedule:  make([]models.ScheduleEntry, len(users)*len(utilities.Range(startDate, endDate))),
-				},
-			}
+		err = db.Write(func(s *Store) error {
+			s.Trips = models.SeedTrip()
 			return nil
 		})
+		if err != nil {
+			slog.Error(err.Error())
+		}
 	} else if err != nil {
 		slog.Error(err.Error())
 	}

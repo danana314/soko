@@ -2,12 +2,10 @@ package store
 
 import (
 	"1008001/splitwiser/internal/models"
-	"1008001/splitwiser/internal/utilities"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
-	"time"
 
 	"crawshaw.dev/jsonfile"
 )
@@ -25,28 +23,7 @@ func TestGetTrip(t *testing.T) {
 		defer os.Remove(path)
 	}
 
-	startDate := utilities.NewDate(2024, time.January, 14)
-	endDate := utilities.NewDate(2024, time.January, 18)
-	want := models.Trip{
-		Id: "test",
-		Users: []models.User{
-			{
-				Id:   1,
-				Name: "John Smith",
-			},
-			{
-				Id:   2,
-				Name: "Jane Smith",
-			},
-			{
-				Id:   3,
-				Name: "Will I Am",
-			},
-		},
-		StartDate: startDate,
-		EndDate:   endDate,
-		Schedule:  make([]models.ScheduleEntry, 3*len(utilities.Range(startDate, endDate))),
-	}
+	want := seedTrip()[0]
 	sampleData := []models.Trip{want}
 
 	db.Write(func(s *Store) error {
