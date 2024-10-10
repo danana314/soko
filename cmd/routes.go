@@ -1,13 +1,16 @@
 package main
 
 import (
-	"1008001/splitwiser/assets"
+	"1008001/splitwiser/internal/db"
+	"1008001/splitwiser/internal/funcs"
 	"1008001/splitwiser/internal/models"
-	"1008001/splitwiser/internal/store"
+	"1008001/splitwiser/web"
 	"fmt"
 	"html/template"
 	"log/slog"
 	"net/http"
+	"reflect"
+	"time"
 
 	"github.com/gorilla/schema"
 	"github.com/urfave/negroni"
@@ -22,25 +25,38 @@ func renderTemplate(t *template.Template, w http.ResponseWriter, tmpl string, da
 	}
 }
 
+var timeConverter = func(value string) reflect.Value {
+	if v, err := time.Parse("2006-01-02", value); err == nil {
+		return reflect.ValueOf(v)
+	}
+	return reflect.Value{} // this is the same as the private const invalidType
+}
+
 func routes() http.Handler {
 	router := http.NewServeMux()
-	var templates = template.Must(template.ParseGlob("assets/templates/*.tmpl"))
+	decoder.RegisterConverter(time.Time{}, timeConverter)
 
-	fileServer := http.FileServer(http.FS(assets.EmbeddedFiles))
+	fileServer := http.FileServer(http.FS(web.EmbeddedFiles))
 	router.Handle("GET /static/", fileServer)
 
+	// var templates = template.Must(template.ParseGlob("web/templates/*.tmpl")).Funcs(funcs.TemplateFuncs)
+	templates, err := template.New("").Funcs(funcs.TemplateFuncs).ParseFS(web.EmbeddedFiles, "templates/*.tmpl")
+	if err != nil {
+		slog.Error(err.Error())
+	}
 	router.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(templates, w, "index", nil)
 	})
 
 	router.HandleFunc("POST /t/new", func(w http.ResponseWriter, r *http.Request) {
-		id := store.CreateNewTrip()
-		http.Redirect(w, r, fmt.Sprintf("/t/%s", id), http.StatusSeeOther)
+		trip := models.NewTrip()
+		db.SaveTrip(trip)
+		http.Redirect(w, r, fmt.Sprintf("/t/%s", trip.Ref), http.StatusSeeOther)
 	})
 
-	router.HandleFunc("GET /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
-		id := r.PathValue("tripId")
-		trip := store.GetTrip(id)
+	router.HandleFunc("GET /t/{tripRef}", func(w http.ResponseWriter, r *http.Request) {
+		ref := r.PathValue("tripRef")
+		trip := db.GetTrip(ref)
 		if trip == nil {
 			http.Error(w, "trip not found", http.StatusNotFound)
 		} else {
@@ -48,21 +64,21 @@ func routes() http.Handler {
 		}
 	})
 
-	router.HandleFunc("POST /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
-		tripId := r.PathValue("tripId")
+	router.HandleFunc("POST /t/{tripRef}", func(w http.ResponseWriter, r *http.Request) {
+		tripRef := r.PathValue("tripRef")
 		err := r.ParseForm()
 		if err != nil {
 			slog.Error(err.Error())
 		}
 
 		trip := &models.Trip{}
-		trip.Id = tripId
+		trip.Ref = tripRef
 		err = decoder.Decode(trip, r.PostForm)
 		if err != nil {
 			slog.Error(err.Error(), "postform", r.PostForm)
 		}
 		trip.UpdateTripDetails(trip)
-		store.UpdateTrip(trip)
+		db.SaveTrip(trip)
 		renderTemplate(templates, w, "trip_detail", trip)
 	})
 

@@ -5,17 +5,13 @@
     <title>tripwiser</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <script type="text/javascript" src="../static/js/alpinejs_3_14_1.min.js"></script> -->
-    <!-- <script type="text/javascript" src="../static/js/htmx_1_9_12.min.js"></script> -->
-    <!-- <script src="../static/js/tailwind_3_4_5.es"></script> -->
-    <!-- <link rel="stylesheet" type="text/css" href="../static/css/daisyui_4_10_2.full.min.css" /> -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.5/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com/3.4.5"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
+    <script defer type="text/javascript" src="/static/js/alpinejs_3_14_1.min.js"></script>
+    <script src="/static/js/tailwind_3_4_5.es"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/daisyui_4_10_2.full.min.css" />
+    <script type="text/javascript" src="/static/js/htmx_1_9_12.min.js"></script>
   </head>
   <body>
-    <h1>Welcome to Trip {{.Id}}</h1>
+    <h1>Welcome to Trip {{.Ref}}</h1>
     {{template "trip_detail" .}}
   </body>
 </html>
@@ -78,17 +74,17 @@
 
 {{block "trip_overview" .}}
 <div class="border rounded-md border-gray-200/70">
-  <form class="text-left" hx-post="/t/{{.Id}}" hx-target="#trip" hx-swap="innerHTML">
+  <form class="text-left" hx-post="/t/{{.Ref}}" hx-target="#trip" hx-swap="innerHTML">
     <label for="TripName">Trip name: </label>
     <input
       {{ if .Name }} value="{{ .Name }}" {{ end }}
       type="text" name="TripName" placeholder="trip name"><br/>
 
     <label for="StartDate">Start: </label>
-    <input type="date" name="StartDate" value="{{.StartDate}}"/><br/>
+    <input type="date" name="StartDate" value="{{formatTime .StartDate}}"/><br/>
 
     <label for="EndDate">End: </label>
-    <input type="date" name="EndDate" value="{{.EndDate}}"/><br/>
+    <input type="date" name="EndDate" value="{{formatTime .EndDate}}"/><br/>
     <button class="btn" type="submit">Update</button>
   </form>
 </div>
@@ -108,7 +104,7 @@
 {{block "schedule" .}}
   Who's coming when
   <div class="overflow-x-auto">
-    <form class="text-left" hx-post="/t/{{.Id}}/schedule" hx-target="#trip" hx-swap="innerHTML">
+    <form class="text-left" hx-post="/t/{{.Ref}}/schedule" hx-target="#trip" hx-swap="innerHTML">
     <table class="table table-zebra table-xs table-pin-rows table-pin-cols">
       <thead>
         <th scope="col"></th>

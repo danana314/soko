@@ -1,24 +1,29 @@
 package main
 
 import (
-	"1008001/splitwiser/internal/store"
+	"1008001/splitwiser/internal/db"
+	"log/slog"
 	"net/http"
+	"os"
+	"runtime/debug"
 )
 
 func main() {
-	store.Init()
-	// db, err := store.New("db.sqlite")
-	// if err != nil {
-	// trace := string(debug.Stack())
-	// slog.Error(err.Error(), "trace", trace)
-	// os.Exit(1)
-	// }
-	// defer db.Close()
+	// path := filepath.Join(os.TempDir(), "db.sqlite")
+	path := "db.sqlite"
+	db, err := db.Init(path)
+	if err != nil {
+		trace := string(debug.Stack())
+		slog.Error(err.Error(), "trace", trace)
+		os.Exit(1)
+	}
+	defer db.Close()
 
 	server := &http.Server{
 		Addr:    "localhost:8080",
 		Handler: routes(),
 	}
 
-	server.ListenAndServe()
+	err = server.ListenAndServe()
+	slog.Error(err.Error())
 }
