@@ -50,13 +50,13 @@ func routes() http.Handler {
 
 	router.HandleFunc("POST /t/new", func(w http.ResponseWriter, r *http.Request) {
 		trip := models.NewTrip()
-		db.SaveTrip(trip)
-		http.Redirect(w, r, fmt.Sprintf("/t/%s", trip.Ref), http.StatusSeeOther)
+		db.SaveTripDetails(trip)
+		http.Redirect(w, r, fmt.Sprintf("/t/%s", trip.Id), http.StatusSeeOther)
 	})
 
-	router.HandleFunc("GET /t/{tripRef}", func(w http.ResponseWriter, r *http.Request) {
-		ref := r.PathValue("tripRef")
-		trip := db.GetTrip(ref)
+	router.HandleFunc("GET /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
+		tripId := r.PathValue("tripId")
+		trip := db.GetTrip(tripId)
 		if trip == nil {
 			http.Error(w, "trip not found", http.StatusNotFound)
 		} else {
@@ -64,21 +64,21 @@ func routes() http.Handler {
 		}
 	})
 
-	router.HandleFunc("POST /t/{tripRef}", func(w http.ResponseWriter, r *http.Request) {
-		tripRef := r.PathValue("tripRef")
+	router.HandleFunc("POST /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
+		tripId := r.PathValue("tripId")
 		err := r.ParseForm()
 		if err != nil {
 			slog.Error(err.Error())
 		}
 
 		trip := &models.Trip{}
-		trip.Ref = tripRef
+		trip.Id = tripId
 		err = decoder.Decode(trip, r.PostForm)
 		if err != nil {
 			slog.Error(err.Error(), "postform", r.PostForm)
 		}
-		trip.UpdateTripDetails(trip)
-		db.SaveTrip(trip)
+		db.SaveTripDetails(trip)
+		trip = db.GetTrip(trip.Id)
 		renderTemplate(templates, w, "trip_detail", trip)
 	})
 

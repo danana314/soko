@@ -64,14 +64,14 @@ func Init(dsn string) (*DB, error) {
 	return db_instance, nil
 }
 
-func SaveTrip(trip *models.Trip) {
-	upsertTripDetails := `INSERT INTO trips(ref, name, start_date, end_date)
+func SaveTripDetails(trip *models.Trip) {
+	upsertTripDetails := `INSERT INTO trips(tripId, name, startDate, endDate)
 		VALUES (?, ?, ?, ?)
-		ON CONFLICT(ref) DO UPDATE SET
+		ON CONFLICT(tripId) DO UPDATE SET
 			name=excluded.name,
-			start_date=excluded.start_date,
-			end_date=excluded.end_date;`
-	res, err := db_instance.Exec(upsertTripDetails, trip.Ref, trip.Name, trip.StartDate, trip.EndDate)
+			startDate=excluded.startDate,
+			endDate=excluded.endDate;`
+	res, err := db_instance.Exec(upsertTripDetails, trip.Id, trip.Name, trip.StartDate, trip.EndDate)
 	if err != nil {
 		slog.Error(err.Error())
 	}
@@ -80,17 +80,40 @@ func SaveTrip(trip *models.Trip) {
 	}
 }
 
-func GetTrip(tripRef string) *models.Trip {
-	queryStatement := `
-		SELECT id, ref, name, start_date, end_date
-		from trips
-		where ref=?
-	`
+func GetTrip(tripId string) *models.Trip {
 	var trip *models.Trip = new(models.Trip)
-	err := db_instance.QueryRow(queryStatement, tripRef).Scan(&trip.Id, &trip.Ref, &trip.Name, &trip.StartDate, &trip.EndDate)
+
+	// get trip
+	queryStatement := `
+		SELECT tripId, name, startDate, endDate
+		FROM trips
+		WHERE tripId=?;`
+	err := db_instance.QueryRow(queryStatement, tripId).Scan(&trip.Id, &trip.Name, &trip.StartDate, &trip.EndDate)
 	if err != nil {
 		slog.Error(err.Error())
 	}
+
+	// get users
+	queryStatement = `
+		SELECT userId, name
+		FROM users
+		WHERE tripId=?;`
+	rows, err := db_instance.Query(queryStatement, tripId)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user models.User
+		if err := rows.Scan(&user.Id, &user.Name); err != nil {
+			slog.Error(err.Error())
+		}
+		trip.Users = append(trip.Users, user)
+	}
+	if err := rows.Err(); err != nil {
+		slog.Error(err.Error())
+	}
+
 	slog.Info(fmt.Sprintf("%#v", trip))
 	return trip
 }

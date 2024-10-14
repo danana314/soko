@@ -11,7 +11,7 @@
     <script type="text/javascript" src="/static/js/htmx_1_9_12.min.js"></script>
   </head>
   <body>
-    <h1>Welcome to Trip {{.Ref}}</h1>
+    <h1>Welcome to Trip {{.Id}}</h1>
     {{template "trip_detail" .}}
   </body>
 </html>
@@ -74,7 +74,7 @@
 
 {{block "trip_overview" .}}
 <div class="border rounded-md border-gray-200/70">
-  <form class="text-left" hx-post="/t/{{.Ref}}" hx-target="#trip" hx-swap="innerHTML">
+  <form class="text-left" hx-post="/t/{{.Id}}" hx-target="#trip" hx-swap="innerHTML">
     <label for="TripName">Trip name: </label>
     <input
       {{ if .Name }} value="{{ .Name }}" {{ end }}
@@ -104,7 +104,7 @@
 {{block "schedule" .}}
   Who's coming when
   <div class="overflow-x-auto">
-    <form class="text-left" hx-post="/t/{{.Ref}}/schedule" hx-target="#trip" hx-swap="innerHTML">
+    <form class="text-left" hx-post="/t/{{.Id}}/schedule" hx-target="#trip" hx-swap="innerHTML">
     <table class="table table-zebra table-xs table-pin-rows table-pin-cols">
       <thead>
         <th scope="col"></th>
