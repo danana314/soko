@@ -82,6 +82,17 @@ func routes() http.Handler {
 		renderTemplate(templates, w, "trip_detail", trip)
 	})
 
+	router.HandleFunc("POST /t/{tripId}/u", func(w http.ResponseWriter, r *http.Request) {
+		tripId := r.PathValue("tripId")
+		trip := db.GetTrip(tripId)
+
+		name := r.PostFormValue("name")
+		user := models.NewUser(name)
+		db.AddUser(tripId, user)
+		trip.Users = append(trip.Users, *user)
+		renderTemplate(templates, w, "trip_detail", trip)
+	})
+
 	router.HandleFunc("POST /t/{tripId}/schedule", func(w http.ResponseWriter, r *http.Request) {
 		tripId := r.PathValue("tripId")
 		err := r.ParseForm()

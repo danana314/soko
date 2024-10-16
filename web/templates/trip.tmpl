@@ -89,14 +89,17 @@
   </form>
 </div>
 <div class="border rounded-md border-gray-200/70">
-  <form>
+  <form hx-post="/t/{{.Id}}/u" hx-target="#trip" hx-swap="innerHTML">
     <label>Friends: </label><br/>
     <ul class="list-inside list-['🧑']">
       {{range .Users}}
       <li>{{.Name}}</li>
     {{end}}
     </ul><br/>
-    <button class="btn" type="submit">Update</button>
+    <div class="join">
+        <input class="input input-bordered join-item" type="text" name="name" placeholder="Name">
+        <button class="btn join-item" type="submit">Add user</button>
+    </div>
   </form>
 </div>
 {{end}}

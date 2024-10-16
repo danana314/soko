@@ -33,9 +33,10 @@ func NewTrip() *Trip {
 	return trip
 }
 
-func NewUser() *User {
+func NewUser(name string) *User {
 	user := new(User)
 	user.Id = shortuuid.New()
+	user.Name = name
 	return user
 }
 
