@@ -80,6 +80,18 @@ func SaveTripDetails(trip *models.Trip) {
 	}
 }
 
+func AddUser(tripId string, user *models.User) {
+	insertUser := `INSERT INTO users(userId, tripId, name)
+		VALUES (?, ?, ?);`
+	res, err := db_instance.Exec(insertUser, user.Id, tripId, user.Name)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	if num_rows, _ := res.RowsAffected(); num_rows == 0 {
+		slog.Error(fmt.Sprintf("saving user did not result in insert: %#v", user))
+	}
+}
+
 func GetTrip(tripId string) *models.Trip {
 	var trip *models.Trip = new(models.Trip)
 
