@@ -1,22 +1,22 @@
 package db
 
-var init_db = []string{create_trips, create_users, create_schedule}
+var init_db = []string{createTrips, createUsers, createSchedule}
 
-const create_trips string = `CREATE TABLE IF NOT EXISTS trips (
+const createTrips string = `CREATE TABLE IF NOT EXISTS trips (
     tripId text primary key,
     name text,
     startDate date,
     endDate date
 );`
 
-const create_users string = `CREATE TABLE IF NOT EXISTS users (
+const createUsers string = `CREATE TABLE IF NOT EXISTS users (
     userId text primary key,
     tripId text,
     name text,
     foreign key(tripId) references trips(tripId)
 );`
 
-const create_schedule string = `CREATE TABLE IF NOT EXISTS schedule (
+const createSchedule string = `CREATE TABLE IF NOT EXISTS schedule (
     pk integer primary key autoincrement,
     tripId integer,
     userId integer,
@@ -26,14 +26,14 @@ const create_schedule string = `CREATE TABLE IF NOT EXISTS schedule (
     unique(tripId, userId, date)
 );`
 
-var seed_db = []string{insert_trip, insert_users}
+var seed_db = []string{insertTrip, insertUsers}
 
-const insert_trip string = `
+const insertTrip string = `
 	INSERT INTO trips (tripId, name, startDate, endDate)
 	VALUES ('test', 'test', '2024-01-14', '2024-02-10');
 `
 
-const insert_users string = `
+const insertUsers string = `
 	INSERT INTO users (userId, tripId, name)
 	VALUES
 		('testuser1', 'test', 'John Smith'),
