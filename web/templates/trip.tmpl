@@ -107,7 +107,7 @@
 {{block "schedule" .}}
   Who's coming when
   <div class="overflow-x-auto">
-    <form class="text-left" hx-post="/t/{{.Id}}/schedule" hx-target="#trip" hx-swap="innerHTML">
+    <form class="text-left" hx-post="/t/{{.Id}}/s" hx-target="#trip" hx-swap="innerHTML">
     <table class="table table-zebra table-xs table-pin-rows table-pin-cols">
       <thead>
         <th scope="col"></th>
@@ -116,11 +116,12 @@
         {{ end }}
       </thead>
       <tbody>
-        {{range $date := .DateRange}}
+        {{range $date := dateRange .StartDate .EndDate}}
         <tr>
-          <th scope="row">{{.}}</th>
+          <th scope="row">{{formatTime $date}}</th>
           {{range $user := $.Users}}
-          <td><input type="checkbox" name=".UserDateId $user $date"></td>
+          {{$isBooked := $.IsBooked $user $date}}
+          <td><input type="checkbox" autocomplete="off" name="{{concatUserDate $user $date}}" {{if $isBooked }}checked{{end}}></td>
           {{end}}
         </tr>
         {{end}}

@@ -93,14 +93,23 @@ func routes() http.Handler {
 		renderTemplate(templates, w, "trip_detail", trip)
 	})
 
-	router.HandleFunc("POST /t/{tripId}/schedule", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("POST /t/{tripId}/s", func(w http.ResponseWriter, r *http.Request) {
 		tripId := r.PathValue("tripId")
 		err := r.ParseForm()
 		if err != nil {
 			slog.Error(err.Error())
 		}
-		slog.Info(tripId)
-		slog.Info(fmt.Sprintf("%#v", r.PostForm))
+		trip := db.GetTrip(tripId)
+		trip.Schedule = make([]models.ScheduleEntry, len(r.PostForm))
+		for k, _ := range r.PostForm {
+			se, err := trip.NewScheduleEntry(k)
+			if err != nil {
+				slog.Error(err.Error())
+			}
+			trip.Schedule = append(trip.Schedule, *se)
+		}
+		db.SaveSchedule(trip)
+		renderTemplate(templates, w, "trip_detail", trip)
 	})
 
 	n := negroni.Classic() // default middleware: panic recovery, logger, static serving

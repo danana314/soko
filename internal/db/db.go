@@ -65,13 +65,13 @@ func Init(dsn string) (*DB, error) {
 }
 
 func SaveTripDetails(trip *models.Trip) {
-	upsertTripDetails := `INSERT INTO trips(tripId, name, startDate, endDate)
+	upsertTripDetailsStatement := `INSERT INTO trips(tripId, name, startDate, endDate)
 		VALUES (?, ?, ?, ?)
 		ON CONFLICT(tripId) DO UPDATE SET
 			name=excluded.name,
 			startDate=excluded.startDate,
 			endDate=excluded.endDate;`
-	res, err := db_instance.Exec(upsertTripDetails, trip.Id, trip.Name, trip.StartDate, trip.EndDate)
+	res, err := db_instance.Exec(upsertTripDetailsStatement, trip.Id, trip.Name, trip.StartDate, trip.EndDate)
 	if err != nil {
 		slog.Error(err.Error())
 	}
@@ -81,14 +81,50 @@ func SaveTripDetails(trip *models.Trip) {
 }
 
 func AddUser(tripId string, user *models.User) {
-	insertUser := `INSERT INTO users(userId, tripId, name)
+	insertUserStatement := `INSERT INTO users(userId, tripId, name)
 		VALUES (?, ?, ?);`
-	res, err := db_instance.Exec(insertUser, user.Id, tripId, user.Name)
+	res, err := db_instance.Exec(insertUserStatement, user.Id, tripId, user.Name)
 	if err != nil {
 		slog.Error(err.Error())
 	}
 	if num_rows, _ := res.RowsAffected(); num_rows == 0 {
 		slog.Error(fmt.Sprintf("saving user did not result in insert: %#v", user))
+	}
+}
+
+func SaveSchedule(trip *models.Trip) {
+	deleteStatement := `DELETE FROM schedule
+		WHERE tripId=?;`
+	insertStatement := `INSERT INTO schedule(tripId, userId, date)
+		VALUES (?, ?, ?);`
+
+	tx, err := db_instance.Begin()
+	if err != nil {
+		slog.Error(err.Error())
+	}
+
+	_, err = db_instance.Exec(deleteStatement, trip.Id)
+	if err != nil {
+		tx.Rollback()
+		slog.Error(err.Error())
+		return
+	}
+	for _, se := range trip.Schedule {
+		res, err := db_instance.Exec(insertStatement, trip.Id, se.User.Id, se.Date)
+		if err != nil {
+			tx.Rollback()
+			slog.Error(err.Error())
+			return
+		}
+		if num_rows, _ := res.RowsAffected(); num_rows == 0 {
+			tx.Rollback()
+			slog.Error(fmt.Sprintf("saving schedule did not result in updates: %#v", trip))
+			return
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		slog.Error(err.Error())
 	}
 }
 
@@ -121,6 +157,28 @@ func GetTrip(tripId string) *models.Trip {
 			slog.Error(err.Error())
 		}
 		trip.Users = append(trip.Users, user)
+	}
+	if err := rows.Err(); err != nil {
+		slog.Error(err.Error())
+	}
+
+	// get schedule
+	queryStatement = `
+		SELECT s.date, s.userId, u.name
+		FROM schedule s
+			INNER JOIN users u on s.userId = u.userId
+		WHERE s.tripId=?;`
+	rows, err = db_instance.Query(queryStatement, tripId)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var scheduleEntry models.ScheduleEntry
+		if err := rows.Scan(&scheduleEntry.Date, &scheduleEntry.User.Id, &scheduleEntry.User.Name); err != nil {
+			slog.Error(err.Error())
+		}
+		trip.Schedule = append(trip.Schedule, scheduleEntry)
 	}
 	if err := rows.Err(); err != nil {
 		slog.Error(err.Error())

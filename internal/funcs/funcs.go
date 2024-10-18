@@ -1,6 +1,7 @@
 package funcs
 
 import (
+	"1008001/splitwiser/internal/models"
 	"bytes"
 	"fmt"
 	"html/template"
@@ -28,6 +29,7 @@ var TemplateFuncs = template.FuncMap{
 	"timeSince":      time.Since,
 	"timeUntil":      time.Until,
 	"formatTime":     formatTime,
+	"dateRange":      dateRange,
 	"approxDuration": approxDuration,
 
 	// String functions
@@ -52,11 +54,32 @@ var TemplateFuncs = template.FuncMap{
 	// URL functions
 	"urlSetParam": urlSetParam,
 	"urlDelParam": urlDelParam,
+
+	// domain specific functions
+	"concatUserDate": concatUserDate,
 }
 
 func formatTime(t time.Time) string {
 	format := "2006-01-02"
 	return t.Format(format)
+}
+
+func dateRange(d1, d2 time.Time) []time.Time {
+	var startDate, endDate time.Time
+	if d1.Before(d2) {
+		startDate = d1
+		endDate = d2
+	} else {
+		startDate = d2
+		endDate = d1
+	}
+	diff := int(endDate.Sub(startDate).Hours() / 24)
+	dates := make([]time.Time, diff)
+	for i := 0; i < diff; i++ {
+		nextDate := startDate.AddDate(0, 0, i)
+		dates[i] = nextDate
+	}
+	return dates
 }
 
 func approxDuration(d time.Duration) string {
@@ -224,4 +247,8 @@ func toInt64(i any) (int64, error) {
 	}
 
 	return 0, fmt.Errorf("unable to convert type %T to int", i)
+}
+
+func concatUserDate(u models.User, t time.Time) string {
+	return u.Id + "_" + formatTime(t)
 }
