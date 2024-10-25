@@ -184,6 +184,6 @@ func GetTrip(tripId string) *models.Trip {
 		slog.Error(err.Error())
 	}
 
-	slog.Info(fmt.Sprintf("%#v", trip))
+	// slog.Info(fmt.Sprintf("%#v", trip))
 	return trip
 }

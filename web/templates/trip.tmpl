@@ -40,7 +40,7 @@
           }
         }"
       x-init="tabRepositionMarker($refs.tabButtons.firstElementChild);"
-      class="relative w-full max-w-sm"
+      class="relative w-full"
       id="trip">
 
       <div x-ref="tabButtons" class="relative inline-grid items-center justify-center w-full h-10 grid-cols-4 p-1 text-gray-500 bg-white border border-gray-100 rounded-lg select-none">
@@ -137,5 +137,22 @@ Packing List
 {{end}}
 
 {{block "expenses" .}}
-Expenses
+<form>
+    <div class="join" hx-swap="outerHTML" hx-target="#expenses" hx-post="/t/{.Id}/e">
+        <label class="input input-bordered flex items-center gap-2 join-item">
+          Description
+          <input type="text" class="grow" name="description" placeholder="Enter a description" />
+        </label>
+
+        <label class="input input-bordered flex items-center gap-2 join-item">
+          Amount
+          <input type="number" class="grow" name="amount" placeholder="0.00" min="0.00" step="0.01"/>
+        </label>
+
+        <button class="btn join-item" type="submit">Add Expense</button>
+    </div>
+</form>
+
+<div id="expenses">
+</div>
 {{end}}

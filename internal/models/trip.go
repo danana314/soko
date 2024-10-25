@@ -20,11 +20,20 @@ type Trip struct {
 	StartDate time.Time
 	EndDate   time.Time
 	Schedule  []ScheduleEntry
+	Expenses  []Expense
 }
 
 type ScheduleEntry struct {
 	Date time.Time
 	User User
+}
+
+type Expense struct {
+	Date         time.Time
+	Description  string
+	Amount       int64
+	PaidBy       User
+	Participants []User
 }
 
 func NewTrip() *Trip {
@@ -63,9 +72,7 @@ func (t *Trip) NewScheduleEntry(userDateString string) (*ScheduleEntry, error) {
 }
 
 func (t *Trip) IsBooked(u User, d time.Time) bool {
-	// slog.Info(fmt.Sprintf("%#v", t))
 	for _, se := range t.Schedule {
-		// slog.Info(fmt.Sprint(se))
 		if se.User.Id == u.Id && se.Date == d {
 			return true
 		}
@@ -84,5 +91,4 @@ func splitUserDate(userDateString string) (string, time.Time, error) {
 		return "", time.Time{}, err
 	}
 	return userId, date, nil
-
 }

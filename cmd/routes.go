@@ -71,7 +71,7 @@ func routes() http.Handler {
 			slog.Error(err.Error())
 		}
 
-		trip := &models.Trip{}
+		trip := new(models.Trip)
 		trip.Id = tripId
 		err = decoder.Decode(trip, r.PostForm)
 		if err != nil {
@@ -100,7 +100,6 @@ func routes() http.Handler {
 			slog.Error(err.Error())
 		}
 		trip := db.GetTrip(tripId)
-		trip.Schedule = make([]models.ScheduleEntry, len(r.PostForm))
 		for k, _ := range r.PostForm {
 			se, err := trip.NewScheduleEntry(k)
 			if err != nil {
@@ -109,6 +108,23 @@ func routes() http.Handler {
 			trip.Schedule = append(trip.Schedule, *se)
 		}
 		db.SaveSchedule(trip)
+		renderTemplate(templates, w, "trip_detail", trip)
+	})
+
+	router.HandleFunc("POST /t/{tripId}/e", func(w http.ResponseWriter, r *http.Request) {
+		tripId := r.PathValue("tripId")
+		err := r.ParseForm()
+		if err != nil {
+			slog.Error(err.Error())
+		}
+		expense := new(models.Expense)
+		err = decoder.Decode(expense, r.PostForm)
+		if err != nil {
+			slog.Error(err.Error(), "postform", r.PostForm)
+		}
+		trip := db.GetTrip(tripId)
+		trip.Expenses = append(trip.Expenses, *expense)
+		slog.Info(fmt.Sprintf("%#v", trip))
 		renderTemplate(templates, w, "trip_detail", trip)
 	})
 
