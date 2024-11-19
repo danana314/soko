@@ -44,6 +44,10 @@ tidy:
 	go mod tidy -v
 	go fmt ./...
 
+.PHONY: sqlc
+sqlc:
+	go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest generate
+
 ## build: build the cmd/web application
 .PHONY: build
 build:
