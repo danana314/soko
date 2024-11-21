@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-var seed_db = []string{insertExpenses}
-
 func SeedDB(queries *Queries) {
 	ctx := context.Background()
 
@@ -46,9 +44,14 @@ func SeedDB(queries *Queries) {
 	}
 
 	// expenses
+	if _, err := queries.AddExpense(ctx, AddExpenseParams{
+		TripID:       "test",
+		Date:         sql.NullTime{Time: time.Date(2024, time.January, 15, 0, 0, 0, 0, time.Local), Valid: true},
+		Description:  sql.NullString{String: "food at restaurant", Valid: true},
+		Amount:       sql.NullFloat64{Float64: 143.50, Valid: true},
+		PaidByUserID: sql.NullString{String: "testuser3", Valid: true},
+		Participants: []byte("[testuser1]"),
+	}); err != nil {
+		slog.Error(err.Error())
+	}
 }
-
-const insertExpenses string = `
-	INSERT INTO expenses (tripId, date, description, amount, paidByUserId, participants)
-	VALUES ('test', '2024-01-15', 'food at restaurant', 143.50, 'testuser3', '');
-`

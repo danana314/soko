@@ -38,5 +38,15 @@ DELETE FROM schedule
 WHERE trip_id=?;
 
 -- name: AddSchedule :execresult
-INSERT INTO schedule(trip_id, user_id, date)
-VALUES (?, ?, ?);
+INSERT INTO schedule(
+    trip_id, user_id, date
+) VALUES (
+    ?, ?, ?
+);
+
+-- name: AddExpense :execresult
+INSERT INTO expenses (
+    trip_id, date, description, amount, paid_by_user_id, participants
+) VALUES (
+    ?, ?, ?, ?, ?, ?
+);

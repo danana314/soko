@@ -10,9 +10,40 @@ import (
 	"database/sql"
 )
 
+const addExpense = `-- name: AddExpense :execresult
+INSERT INTO expenses (
+    trip_id, date, description, amount, paid_by_user_id, participants
+) VALUES (
+    ?, ?, ?, ?, ?, ?
+)
+`
+
+type AddExpenseParams struct {
+	TripID       string
+	Date         sql.NullTime
+	Description  sql.NullString
+	Amount       sql.NullFloat64
+	PaidByUserID sql.NullString
+	Participants []byte
+}
+
+func (q *Queries) AddExpense(ctx context.Context, arg AddExpenseParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, addExpense,
+		arg.TripID,
+		arg.Date,
+		arg.Description,
+		arg.Amount,
+		arg.PaidByUserID,
+		arg.Participants,
+	)
+}
+
 const addSchedule = `-- name: AddSchedule :execresult
-INSERT INTO schedule(trip_id, user_id, date)
-VALUES (?, ?, ?)
+INSERT INTO schedule(
+    trip_id, user_id, date
+) VALUES (
+    ?, ?, ?
+)
 `
 
 type AddScheduleParams struct {

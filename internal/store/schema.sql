@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS schedule (
 
 CREATE TABLE IF NOT EXISTS expenses (
 	-- pk integer primary key autoincrement,
-	trip_id text not nul,
+	trip_id text not null,
 	date date,
 	description text,
 	amount decimal(10,2),

@@ -23,6 +23,7 @@ type DB struct {
 }
 
 var db_instance *DB
+var queries *Queries
 
 func Init(dsn string) (*DB, error) {
 	// ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
@@ -43,18 +44,17 @@ func Init(dsn string) (*DB, error) {
 	db.SetConnMaxIdleTime(5 * time.Minute)
 	db.SetConnMaxLifetime(2 * time.Hour)
 
+	queries = New(db)
+
 	// create tables
 	if _, err := db.Exec(ddl); err != nil {
 		slog.Error(err.Error())
 	}
 	slog.Info("db initialised")
 
+	// seed db
 	if seedDb {
-		for _, insStmt := range seed_db {
-			if _, err := db.Exec(insStmt); err != nil {
-				slog.Error(err.Error())
-			}
-		}
+		SeedDB(queries)
 		slog.Info("db seeded")
 	}
 

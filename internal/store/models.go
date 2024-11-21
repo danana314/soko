@@ -9,7 +9,7 @@ import (
 )
 
 type Expense struct {
-	TripID       interface{}
+	TripID       string
 	Date         sql.NullTime
 	Description  sql.NullString
 	Amount       sql.NullFloat64
