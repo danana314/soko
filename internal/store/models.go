@@ -9,7 +9,7 @@ import (
 )
 
 type Expense struct {
-	TripID       sql.NullString
+	TripID       interface{}
 	Date         sql.NullTime
 	Description  sql.NullString
 	Amount       sql.NullFloat64
@@ -18,8 +18,8 @@ type Expense struct {
 }
 
 type Schedule struct {
-	TripID sql.NullString
-	UserID sql.NullString
+	TripID string
+	UserID string
 	Date   sql.NullTime
 }
 
@@ -32,6 +32,6 @@ type Trip struct {
 
 type User struct {
 	UserID string
-	TripID sql.NullString
+	TripID string
 	Name   sql.NullString
 }

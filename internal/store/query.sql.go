@@ -16,8 +16,8 @@ VALUES (?, ?, ?)
 `
 
 type AddScheduleParams struct {
-	TripID sql.NullString
-	UserID sql.NullString
+	TripID string
+	UserID string
 	Date   sql.NullTime
 }
 
@@ -35,7 +35,7 @@ INSERT INTO users(
 
 type AddUserParams struct {
 	UserID string
-	TripID sql.NullString
+	TripID string
 	Name   sql.NullString
 }
 
@@ -48,7 +48,7 @@ DELETE FROM schedule
 WHERE trip_id=?
 `
 
-func (q *Queries) DeleteSchedule(ctx context.Context, tripID sql.NullString) error {
+func (q *Queries) DeleteSchedule(ctx context.Context, tripID string) error {
 	_, err := q.db.ExecContext(ctx, deleteSchedule, tripID)
 	return err
 }
@@ -62,11 +62,11 @@ WHERE s.trip_id=?
 
 type GetScheduleRow struct {
 	Date   sql.NullTime
-	UserID sql.NullString
+	UserID string
 	Name   sql.NullString
 }
 
-func (q *Queries) GetSchedule(ctx context.Context, tripID sql.NullString) ([]GetScheduleRow, error) {
+func (q *Queries) GetSchedule(ctx context.Context, tripID string) ([]GetScheduleRow, error) {
 	rows, err := q.db.QueryContext(ctx, getSchedule, tripID)
 	if err != nil {
 		return nil, err
@@ -118,7 +118,7 @@ type GetUsersRow struct {
 	Name   sql.NullString
 }
 
-func (q *Queries) GetUsers(ctx context.Context, tripID sql.NullString) ([]GetUsersRow, error) {
+func (q *Queries) GetUsers(ctx context.Context, tripID string) ([]GetUsersRow, error) {
 	rows, err := q.db.QueryContext(ctx, getUsers, tripID)
 	if err != nil {
 		return nil, err

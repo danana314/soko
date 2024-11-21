@@ -7,15 +7,15 @@ CREATE TABLE IF NOT EXISTS trips (
 
 CREATE TABLE IF NOT EXISTS users (
     user_id text primary key,
-    trip_id text,
+    trip_id text not null,
     name text,
     foreign key(trip_id) references trips(trip_id)
 );
 
 CREATE TABLE IF NOT EXISTS schedule (
     -- pk integer primary key autoincrement,
-    trip_id text,
-    user_id text,
+    trip_id text not null,
+    user_id text not null,
     date date,
     foreign key(trip_id) references trips(trip_id),
     foreign key(user_id) references users(user_id),
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS schedule (
 
 CREATE TABLE IF NOT EXISTS expenses (
 	-- pk integer primary key autoincrement,
-	trip_id text,
+	trip_id text not nul,
 	date date,
 	description text,
 	amount decimal(10,2),
