@@ -2,36 +2,36 @@
 // versions:
 //   sqlc v1.27.0
 
-package db
+package store
 
 import (
 	"database/sql"
 )
 
 type Expense struct {
-	Tripid       sql.NullString
+	TripID       sql.NullString
 	Date         sql.NullTime
 	Description  sql.NullString
 	Amount       sql.NullFloat64
-	Paidbyuserid sql.NullString
+	PaidByUserID sql.NullString
 	Participants []byte
 }
 
 type Schedule struct {
-	Tripid sql.NullString
-	Userid sql.NullString
+	TripID sql.NullString
+	UserID sql.NullString
 	Date   sql.NullTime
 }
 
 type Trip struct {
-	Tripid    string
+	TripID    string
 	Name      sql.NullString
-	Startdate sql.NullTime
-	Enddate   sql.NullTime
+	StartDate sql.NullTime
+	EndDate   sql.NullTime
 }
 
 type User struct {
-	Userid string
-	Tripid sql.NullString
+	UserID string
+	TripID sql.NullString
 	Name   sql.NullString
 }

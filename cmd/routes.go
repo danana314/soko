@@ -1,9 +1,9 @@
 package main
 
 import (
-	"1008001/splitwiser/internal/db"
 	"1008001/splitwiser/internal/funcs"
 	"1008001/splitwiser/internal/models"
+	"1008001/splitwiser/internal/store"
 	"1008001/splitwiser/web"
 	"fmt"
 	"html/template"
@@ -50,13 +50,13 @@ func routes() http.Handler {
 
 	router.HandleFunc("POST /t/new", func(w http.ResponseWriter, r *http.Request) {
 		trip := models.NewTrip()
-		db.SaveTripDetails(trip)
+		store.SaveTripDetails(trip)
 		http.Redirect(w, r, fmt.Sprintf("/t/%s", trip.Id), http.StatusSeeOther)
 	})
 
 	router.HandleFunc("GET /t/{tripId}", func(w http.ResponseWriter, r *http.Request) {
 		tripId := r.PathValue("tripId")
-		trip := db.GetTrip(tripId)
+		trip := store.GetTrip(tripId)
 		if trip == nil {
 			http.Error(w, "trip not found", http.StatusNotFound)
 		} else {
@@ -77,18 +77,18 @@ func routes() http.Handler {
 		if err != nil {
 			slog.Error(err.Error(), "postform", r.PostForm)
 		}
-		db.SaveTripDetails(trip)
-		trip = db.GetTrip(trip.Id)
+		store.SaveTripDetails(trip)
+		trip = store.GetTrip(trip.Id)
 		renderTemplate(templates, w, "trip_detail", trip)
 	})
 
 	router.HandleFunc("POST /t/{tripId}/u", func(w http.ResponseWriter, r *http.Request) {
 		tripId := r.PathValue("tripId")
-		trip := db.GetTrip(tripId)
+		trip := store.GetTrip(tripId)
 
 		name := r.PostFormValue("name")
 		user := models.NewUser(name)
-		db.AddUser(tripId, user)
+		store.AddUser(tripId, user)
 		trip.Users = append(trip.Users, *user)
 		renderTemplate(templates, w, "trip_detail", trip)
 	})
@@ -99,15 +99,15 @@ func routes() http.Handler {
 		if err != nil {
 			slog.Error(err.Error())
 		}
-		trip := db.GetTrip(tripId)
-		for k, _ := range r.PostForm {
+		trip := store.GetTrip(tripId)
+		for k := range r.PostForm {
 			se, err := trip.NewScheduleEntry(k)
 			if err != nil {
 				slog.Error(err.Error())
 			}
 			trip.Schedule = append(trip.Schedule, *se)
 		}
-		db.SaveSchedule(trip)
+		store.SaveSchedule(trip)
 		renderTemplate(templates, w, "trip_detail", trip)
 	})
 
@@ -122,7 +122,7 @@ func routes() http.Handler {
 		if err != nil {
 			slog.Error(err.Error(), "postform", r.PostForm)
 		}
-		trip := db.GetTrip(tripId)
+		trip := store.GetTrip(tripId)
 		trip.Expenses = append(trip.Expenses, *expense)
 		slog.Info(fmt.Sprintf("%#v", trip))
 		renderTemplate(templates, w, "trip_detail", trip)

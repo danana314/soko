@@ -1,8 +1,9 @@
-package db
+package store
 
 import (
 	"1008001/splitwiser/internal/models"
 	"database/sql"
+	_ "embed"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -11,6 +12,9 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+//go:embed schema.sql
+var ddl string
 
 const defaultTimeout = 3 * time.Second
 
@@ -44,10 +48,9 @@ func Init(dsn string) (*DB, error) {
 	db.SetConnMaxIdleTime(5 * time.Minute)
 	db.SetConnMaxLifetime(2 * time.Hour)
 
-	for _, tbl := range init_db {
-		if _, err := db.Exec(tbl); err != nil {
-			slog.Error(err.Error())
-		}
+	// create tables
+	if _, err := db.Exec(ddl); err != nil {
+		slog.Error(err.Error())
 	}
 	slog.Info("db initialised")
 

@@ -1,42 +1,42 @@
 -- name: GetTrip :one
-SELECT tripId, name, startDate, endDate
+SELECT trip_id, name, start_date, end_date
 FROM trips
-WHERE tripId=?;
+WHERE trip_id=?;
 
 -- name: GetUsers :many
-SELECT userId, name
+SELECT user_id, name
 FROM users
-WHERE tripId=?;
+WHERE trip_id=?;
 
 -- name: GetSchedule :many
-SELECT s.date, s.userId, u.name
+SELECT s.date, s.user_id, u.name
 FROM schedule s
-	INNER JOIN users u on s.userId = u.userId
-WHERE s.tripId=?;
+	INNER JOIN users u on s.user_id = u.user_id
+WHERE s.trip_id=?;
 
 -- name: SaveTripDetails :execresult
 INSERT INTO trips(
-    tripId, name, startDate, endDate
+    trip_id, name, start_date, end_date
 ) VALUES (
     ?, ?, ?, ?
 ) ON CONFLICT(
-    tripId
+    trip_id
 ) DO UPDATE SET
 	name=excluded.name,
-	startDate=excluded.startDate,
-	endDate=excluded.endDate;
+	start_date=excluded.start_date,
+	end_date=excluded.end_date;
 
 -- name: AddUser :execresult
 INSERT INTO users(
-    userId, tripId, name
+    user_id, trip_id, name
 ) VALUES (
     ?, ?, ?
 );
 
 -- name: DeleteSchedule :exec
 DELETE FROM schedule
-WHERE tripId=?;
+WHERE trip_id=?;
 
 -- name: AddSchedule :execresult
-INSERT INTO schedule(tripId, userId, date)
+INSERT INTO schedule(trip_id, user_id, date)
 VALUES (?, ?, ?);

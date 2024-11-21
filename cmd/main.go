@@ -1,7 +1,7 @@
 package main
 
 import (
-	"1008001/splitwiser/internal/db"
+	"1008001/splitwiser/internal/store"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,7 +11,7 @@ import (
 func main() {
 	// path := filepath.Join(os.TempDir(), "db.sqlite")
 	path := "db.sqlite"
-	db, err := db.Init(path)
+	db, err := store.Init(path)
 	if err != nil {
 		trace := string(debug.Stack())
 		slog.Error(err.Error(), "trace", trace)

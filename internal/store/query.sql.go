@@ -3,7 +3,7 @@
 //   sqlc v1.27.0
 // source: query.sql
 
-package db
+package store
 
 import (
 	"context"
@@ -11,63 +11,63 @@ import (
 )
 
 const addSchedule = `-- name: AddSchedule :execresult
-INSERT INTO schedule(tripId, userId, date)
+INSERT INTO schedule(trip_id, user_id, date)
 VALUES (?, ?, ?)
 `
 
 type AddScheduleParams struct {
-	Tripid sql.NullString
-	Userid sql.NullString
+	TripID sql.NullString
+	UserID sql.NullString
 	Date   sql.NullTime
 }
 
 func (q *Queries) AddSchedule(ctx context.Context, arg AddScheduleParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, addSchedule, arg.Tripid, arg.Userid, arg.Date)
+	return q.db.ExecContext(ctx, addSchedule, arg.TripID, arg.UserID, arg.Date)
 }
 
 const addUser = `-- name: AddUser :execresult
 INSERT INTO users(
-    userId, tripId, name
+    user_id, trip_id, name
 ) VALUES (
     ?, ?, ?
 )
 `
 
 type AddUserParams struct {
-	Userid string
-	Tripid sql.NullString
+	UserID string
+	TripID sql.NullString
 	Name   sql.NullString
 }
 
 func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, addUser, arg.Userid, arg.Tripid, arg.Name)
+	return q.db.ExecContext(ctx, addUser, arg.UserID, arg.TripID, arg.Name)
 }
 
 const deleteSchedule = `-- name: DeleteSchedule :exec
 DELETE FROM schedule
-WHERE tripId=?
+WHERE trip_id=?
 `
 
-func (q *Queries) DeleteSchedule(ctx context.Context, tripid sql.NullString) error {
-	_, err := q.db.ExecContext(ctx, deleteSchedule, tripid)
+func (q *Queries) DeleteSchedule(ctx context.Context, tripID sql.NullString) error {
+	_, err := q.db.ExecContext(ctx, deleteSchedule, tripID)
 	return err
 }
 
 const getSchedule = `-- name: GetSchedule :many
-SELECT s.date, s.userId, u.name
+SELECT s.date, s.user_id, u.name
 FROM schedule s
-	INNER JOIN users u on s.userId = u.userId
-WHERE s.tripId=?
+	INNER JOIN users u on s.user_id = u.user_id
+WHERE s.trip_id=?
 `
 
 type GetScheduleRow struct {
 	Date   sql.NullTime
-	Userid sql.NullString
+	UserID sql.NullString
 	Name   sql.NullString
 }
 
-func (q *Queries) GetSchedule(ctx context.Context, tripid sql.NullString) ([]GetScheduleRow, error) {
-	rows, err := q.db.QueryContext(ctx, getSchedule, tripid)
+func (q *Queries) GetSchedule(ctx context.Context, tripID sql.NullString) ([]GetScheduleRow, error) {
+	rows, err := q.db.QueryContext(ctx, getSchedule, tripID)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (q *Queries) GetSchedule(ctx context.Context, tripid sql.NullString) ([]Get
 	var items []GetScheduleRow
 	for rows.Next() {
 		var i GetScheduleRow
-		if err := rows.Scan(&i.Date, &i.Userid, &i.Name); err != nil {
+		if err := rows.Scan(&i.Date, &i.UserID, &i.Name); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -90,36 +90,36 @@ func (q *Queries) GetSchedule(ctx context.Context, tripid sql.NullString) ([]Get
 }
 
 const getTrip = `-- name: GetTrip :one
-SELECT tripId, name, startDate, endDate
+SELECT trip_id, name, start_date, end_date
 FROM trips
-WHERE tripId=?
+WHERE trip_id=?
 `
 
-func (q *Queries) GetTrip(ctx context.Context, tripid string) (Trip, error) {
-	row := q.db.QueryRowContext(ctx, getTrip, tripid)
+func (q *Queries) GetTrip(ctx context.Context, tripID string) (Trip, error) {
+	row := q.db.QueryRowContext(ctx, getTrip, tripID)
 	var i Trip
 	err := row.Scan(
-		&i.Tripid,
+		&i.TripID,
 		&i.Name,
-		&i.Startdate,
-		&i.Enddate,
+		&i.StartDate,
+		&i.EndDate,
 	)
 	return i, err
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT userId, name
+SELECT user_id, name
 FROM users
-WHERE tripId=?
+WHERE trip_id=?
 `
 
 type GetUsersRow struct {
-	Userid string
+	UserID string
 	Name   sql.NullString
 }
 
-func (q *Queries) GetUsers(ctx context.Context, tripid sql.NullString) ([]GetUsersRow, error) {
-	rows, err := q.db.QueryContext(ctx, getUsers, tripid)
+func (q *Queries) GetUsers(ctx context.Context, tripID sql.NullString) ([]GetUsersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUsers, tripID)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func (q *Queries) GetUsers(ctx context.Context, tripid sql.NullString) ([]GetUse
 	var items []GetUsersRow
 	for rows.Next() {
 		var i GetUsersRow
-		if err := rows.Scan(&i.Userid, &i.Name); err != nil {
+		if err := rows.Scan(&i.UserID, &i.Name); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -143,29 +143,29 @@ func (q *Queries) GetUsers(ctx context.Context, tripid sql.NullString) ([]GetUse
 
 const saveTripDetails = `-- name: SaveTripDetails :execresult
 INSERT INTO trips(
-    tripId, name, startDate, endDate
+    trip_id, name, start_date, end_date
 ) VALUES (
     ?, ?, ?, ?
 ) ON CONFLICT(
-    tripId
+    trip_id
 ) DO UPDATE SET
 	name=excluded.name,
-	startDate=excluded.startDate,
-	endDate=excluded.endDate
+	start_date=excluded.start_date,
+	end_date=excluded.end_date
 `
 
 type SaveTripDetailsParams struct {
-	Tripid    string
+	TripID    string
 	Name      sql.NullString
-	Startdate sql.NullTime
-	Enddate   sql.NullTime
+	StartDate sql.NullTime
+	EndDate   sql.NullTime
 }
 
 func (q *Queries) SaveTripDetails(ctx context.Context, arg SaveTripDetailsParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, saveTripDetails,
-		arg.Tripid,
+		arg.TripID,
 		arg.Name,
-		arg.Startdate,
-		arg.Enddate,
+		arg.StartDate,
+		arg.EndDate,
 	)
 }
