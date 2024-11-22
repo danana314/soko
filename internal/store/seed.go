@@ -14,11 +14,11 @@ func SeedDB(store *DB) {
 		StartDate: time.Date(2024, time.January, 14, 0, 0, 0, 0, time.Local),
 		EndDate:   time.Date(2024, time.February, 10, 0, 0, 0, 0, time.Local),
 	}
-	UpdateTripDetails(trip)
+	AddOrUpdateTripDetails(trip)
 
 	// users
 	AddUser(tripId, &models.User{
-		Id:   "teseruser1",
+		Id:   "testuser1",
 		Name: "John Smith",
 	})
 	AddUser(tripId, &models.User{

@@ -2,6 +2,7 @@ package store
 
 import (
 	"1008001/splitwiser/internal/models"
+	"1008001/splitwiser/internal/util"
 	"context"
 	"database/sql"
 	_ "embed"
@@ -11,7 +12,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/lithammer/shortuuid/v4"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -69,21 +69,7 @@ func Init(dsn string) (*DB, error) {
 	return db_instance, nil
 }
 
-func NewTrip() string {
-	newTripID := shortuuid.New()
-	addTripDetailsStatement := `INSERT INTO trips(trip_id, name, start_date, end_date)
-	VALUES (?, ?, ?, ?);`
-	res, err := db_instance.Exec(addTripDetailsStatement, newTripID, nil, nil, nil, nil)
-	if err != nil {
-		slog.Error(err.Error())
-	}
-	if num_rows, _ := res.RowsAffected(); num_rows == 0 {
-		slog.Error(fmt.Sprintf(("creating new trip did not result in updates: " + newTripID)))
-	}
-	return newTripID
-}
-
-func UpdateTripDetails(trip *models.Trip) {
+func AddOrUpdateTripDetails(trip *models.Trip) {
 	upsertTripDetailsStatement := `INSERT INTO trips(trip_id, name, start_date, end_date)
 	VALUES (?, ?, ?, ?)
 	ON CONFLICT(trip_id) DO UPDATE SET
@@ -128,10 +114,12 @@ func SaveSchedule(trip *models.Trip) {
 		slog.Error(err.Error())
 		return
 	}
+	slog.Info(util.PrintStruct(trip.Schedule))
 	for _, se := range trip.Schedule {
 		res, err := db_instance.Exec(insertStatement, trip.Id, se.User.Id, se.Date)
 		if err != nil {
 			tx.Rollback()
+			slog.Info(util.PrintStruct(se))
 			slog.Error(err.Error())
 			return
 		}

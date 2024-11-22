@@ -53,7 +53,7 @@ func routes() http.Handler {
 	router.HandleFunc("POST /t/new", NewTrip)
 	router.HandleFunc("GET /t/{tripId}", GetTrip)
 	router.HandleFunc("POST /t/{tripId}", UpdateTrip)
-	router.HandleFunc("POST /t/{tripId}/u", UpdateUser)
+	router.HandleFunc("POST /t/{tripId}/u", AddOrUpdateUser)
 	router.HandleFunc("POST /t/{tripId}/s", UpdateSchedule)
 	router.HandleFunc("POST /t/{tripId}/e", NewExpense)
 
@@ -68,8 +68,9 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewTrip(w http.ResponseWriter, r *http.Request) {
-	newTripID := store.NewTrip()
-	http.Redirect(w, r, fmt.Sprintf("/t/%s", newTripID), http.StatusSeeOther)
+	trip := models.NewTrip()
+	store.AddOrUpdateTripDetails(trip)
+	http.Redirect(w, r, fmt.Sprintf("/t/%s", trip.Id), http.StatusSeeOther)
 }
 
 func GetTrip(w http.ResponseWriter, r *http.Request) {
@@ -95,17 +96,18 @@ func UpdateTrip(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Error(err.Error(), "postform", r.PostForm)
 	}
-	store.UpdateTripDetails(trip)
+	store.AddOrUpdateTripDetails(trip)
 	trip = store.GetTrip(trip.Id)
 	renderTemplate(templates, w, "trip_detail", trip)
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
+func AddOrUpdateUser(w http.ResponseWriter, r *http.Request) {
 	tripId := r.PathValue("tripId")
 	trip := store.GetTrip(tripId)
 
 	name := r.PostFormValue("name")
-	user := models.NewUser(name)
+	user := models.NewUser()
+	user.Name = name
 	store.AddUser(tripId, user)
 	trip.Users = append(trip.Users, *user)
 	renderTemplate(templates, w, "trip_detail", trip)
@@ -118,6 +120,7 @@ func UpdateSchedule(w http.ResponseWriter, r *http.Request) {
 		slog.Error(err.Error())
 	}
 	trip := store.GetTrip(tripId)
+	trip.Schedule = make([]models.ScheduleEntry, 0)
 	for k := range r.PostForm {
 		se, err := trip.NewScheduleEntry(k)
 		if err != nil {
