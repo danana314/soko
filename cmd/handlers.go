@@ -68,9 +68,8 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewTrip(w http.ResponseWriter, r *http.Request) {
-	trip := models.NewTrip()
-	store.SaveTripDetails(trip)
-	http.Redirect(w, r, fmt.Sprintf("/t/%s", trip.Id), http.StatusSeeOther)
+	newTripID := store.NewTrip()
+	http.Redirect(w, r, fmt.Sprintf("/t/%s", newTripID), http.StatusSeeOther)
 }
 
 func GetTrip(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +95,7 @@ func UpdateTrip(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Error(err.Error(), "postform", r.PostForm)
 	}
-	store.SaveTripDetails(trip)
+	store.UpdateTripDetails(trip)
 	trip = store.GetTrip(trip.Id)
 	renderTemplate(templates, w, "trip_detail", trip)
 }

@@ -2,6 +2,7 @@ package store
 
 import (
 	"1008001/splitwiser/internal/models"
+	"context"
 	"database/sql"
 	_ "embed"
 	"errors"
@@ -10,20 +11,27 @@ import (
 	"os"
 	"time"
 
+	"github.com/lithammer/shortuuid/v4"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 //go:embed schema.sql
 var ddl string
 
-const defaultTimeout = 3 * time.Second
+// const defaultTimeout = 3 * time.Second
+
+type Store interface {
+	ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
+	PrepareContext(context.Context, string) (*sql.Stmt, error)
+	QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
+	QueryRowContext(context.Context, string, ...interface{}) *sql.Row
+}
 
 type DB struct {
 	*sql.DB
 }
 
 var db_instance *DB
-var queries *Queries
 
 func Init(dsn string) (*DB, error) {
 	// ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
@@ -44,31 +52,44 @@ func Init(dsn string) (*DB, error) {
 	db.SetConnMaxIdleTime(5 * time.Minute)
 	db.SetConnMaxLifetime(2 * time.Hour)
 
-	queries = New(db)
+	db_instance = &DB{db}
 
 	// create tables
-	if _, err := db.Exec(ddl); err != nil {
+	if _, err := db_instance.Exec(ddl); err != nil {
 		slog.Error(err.Error())
 	}
 	slog.Info("db initialised")
 
 	// seed db
 	if seedDb {
-		SeedDB(queries)
+		SeedDB(db_instance)
 		slog.Info("db seeded")
 	}
 
-	db_instance = &DB{db}
 	return db_instance, nil
 }
 
-func SaveTripDetails(trip *models.Trip) {
-	upsertTripDetailsStatement := `INSERT INTO trips(tripId, name, startDate, endDate)
-		VALUES (?, ?, ?, ?)
-		ON CONFLICT(tripId) DO UPDATE SET
-			name=excluded.name,
-			startDate=excluded.startDate,
-			endDate=excluded.endDate;`
+func NewTrip() string {
+	newTripID := shortuuid.New()
+	addTripDetailsStatement := `INSERT INTO trips(trip_id, name, start_date, end_date)
+	VALUES (?, ?, ?, ?);`
+	res, err := db_instance.Exec(addTripDetailsStatement, newTripID, nil, nil, nil, nil)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	if num_rows, _ := res.RowsAffected(); num_rows == 0 {
+		slog.Error(fmt.Sprintf(("creating new trip did not result in updates: " + newTripID)))
+	}
+	return newTripID
+}
+
+func UpdateTripDetails(trip *models.Trip) {
+	upsertTripDetailsStatement := `INSERT INTO trips(trip_id, name, start_date, end_date)
+	VALUES (?, ?, ?, ?)
+	ON CONFLICT(trip_id) DO UPDATE SET
+		name=excluded.name,
+		start_date=excluded.start_date,
+		end_date=excluded.end_date;`
 	res, err := db_instance.Exec(upsertTripDetailsStatement, trip.Id, trip.Name, trip.StartDate, trip.EndDate)
 	if err != nil {
 		slog.Error(err.Error())
@@ -79,7 +100,7 @@ func SaveTripDetails(trip *models.Trip) {
 }
 
 func AddUser(tripId string, user *models.User) {
-	insertUserStatement := `INSERT INTO users(userId, tripId, name)
+	insertUserStatement := `INSERT INTO users(user_id, trip_id, name)
 		VALUES (?, ?, ?);`
 	res, err := db_instance.Exec(insertUserStatement, user.Id, tripId, user.Name)
 	if err != nil {
@@ -92,8 +113,8 @@ func AddUser(tripId string, user *models.User) {
 
 func SaveSchedule(trip *models.Trip) {
 	deleteStatement := `DELETE FROM schedule
-		WHERE tripId=?;`
-	insertStatement := `INSERT INTO schedule(tripId, userId, date)
+		WHERE trip_id=?;`
+	insertStatement := `INSERT INTO schedule(trip_id, user_id, date)
 		VALUES (?, ?, ?);`
 
 	tx, err := db_instance.Begin()
@@ -131,9 +152,9 @@ func GetTrip(tripId string) *models.Trip {
 
 	// get trip
 	queryStatement := `
-		SELECT tripId, name, startDate, endDate
+		SELECT trip_id, name, start_date, end_date
 		FROM trips
-		WHERE tripId=?;`
+		WHERE trip_id=?;`
 	err := db_instance.QueryRow(queryStatement, tripId).Scan(&trip.Id, &trip.Name, &trip.StartDate, &trip.EndDate)
 	if err != nil {
 		slog.Error(err.Error())
@@ -141,9 +162,9 @@ func GetTrip(tripId string) *models.Trip {
 
 	// get users
 	queryStatement = `
-		SELECT userId, name
+		SELECT user_id, name
 		FROM users
-		WHERE tripId=?;`
+		WHERE trip_id=?;`
 	rows, err := db_instance.Query(queryStatement, tripId)
 	if err != nil {
 		slog.Error(err.Error())
@@ -162,10 +183,10 @@ func GetTrip(tripId string) *models.Trip {
 
 	// get schedule
 	queryStatement = `
-		SELECT s.date, s.userId, u.name
+		SELECT s.date, s.user_id, u.name
 		FROM schedule s
-			INNER JOIN users u on s.userId = u.userId
-		WHERE s.tripId=?;`
+			INNER JOIN users u on s.user_id = u.user_id
+		WHERE s.trip_id=?;`
 	rows, err = db_instance.Query(queryStatement, tripId)
 	if err != nil {
 		slog.Error(err.Error())
