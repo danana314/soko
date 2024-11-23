@@ -53,7 +53,8 @@ func routes() http.Handler {
 	router.HandleFunc("POST /t/new", NewTrip)
 	router.HandleFunc("GET /t/{tripId}", GetTrip)
 	router.HandleFunc("POST /t/{tripId}", UpdateTrip)
-	router.HandleFunc("POST /t/{tripId}/u", AddOrUpdateUser)
+	router.HandleFunc("POST /t/{tripId}/u", AddUser)
+	router.HandleFunc("POST /t/{tripId}/u/{userId}", DeleteUser)
 	router.HandleFunc("POST /t/{tripId}/s", UpdateSchedule)
 	router.HandleFunc("POST /t/{tripId}/e", NewExpense)
 
@@ -101,7 +102,7 @@ func UpdateTrip(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(templates, w, "trip_detail", trip)
 }
 
-func AddOrUpdateUser(w http.ResponseWriter, r *http.Request) {
+func AddUser(w http.ResponseWriter, r *http.Request) {
 	tripId := r.PathValue("tripId")
 	trip := store.GetTrip(tripId)
 
@@ -110,6 +111,16 @@ func AddOrUpdateUser(w http.ResponseWriter, r *http.Request) {
 	user.Name = name
 	store.AddUser(tripId, user)
 	trip.Users = append(trip.Users, *user)
+	renderTemplate(templates, w, "trip_detail", trip)
+}
+
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	tripId := r.PathValue("tripId")
+	trip := store.GetTrip(tripId)
+
+	// TODO can only delete if not involved in expenses - check!
+
+	// userId := r.PostFormValue("userId")
 	renderTemplate(templates, w, "trip_detail", trip)
 }
 

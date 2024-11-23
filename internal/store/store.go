@@ -97,6 +97,24 @@ func AddUser(tripId string, user *models.User) {
 	}
 }
 
+func DeleteUser(tripId string, userId string) {
+	return
+	// deleteScheduleEntriesStatement := `
+	// 	DELETE FROM schedule
+	// 	WHERE trip_id=? and user_id=?;
+	// `
+
+	deleteUserStatement := `DELETE FROM users(user_id, trip_id, name)
+		VALUES (?, ?, ?);`
+	res, err := db_instance.Exec(deleteUserStatement, user.Id, tripId, user.Name)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	if num_rows, _ := res.RowsAffected(); num_rows == 0 {
+		slog.Error(fmt.Sprintf("saving user did not result in insert: %#v", user))
+	}
+}
+
 func SaveSchedule(trip *models.Trip) {
 	deleteStatement := `DELETE FROM schedule
 		WHERE trip_id=?;`

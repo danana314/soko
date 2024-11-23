@@ -82,13 +82,18 @@
   </form>
 </div>
 <div class="border rounded-md border-gray-200/70">
+  <label>Friends: </label><br/>
+  <ul class="list-inside">
+    {{range .Users}}
+    <li>
+      <div class="flex flex-row">
+        <img hx-delete="/t/{{$.Id}}/u/{{.Id}}" class="h-5 w-5" src="/static/img/delete.png" alt="delete user"/>
+        {{.Name}}
+      </div>
+    </li>
+  {{end}}
+  </ul><br/>
   <form hx-post="/t/{{.Id}}/u" hx-target="#trip" hx-swap="innerHTML">
-    <label>Friends: </label><br/>
-    <ul class="list-inside list-['🧑']">
-      {{range .Users}}
-      <li>{{.Name}}</li>
-    {{end}}
-    </ul><br/>
     <div class="join">
         <input class="input input-bordered join-item" type="text" name="name" placeholder="Name">
         <button class="btn join-item" type="submit">Add user</button>
