@@ -104,14 +104,14 @@ func DeleteUser(tripId string, userId string) {
 	// 	WHERE trip_id=? and user_id=?;
 	// `
 
-	deleteUserStatement := `DELETE FROM users(user_id, trip_id, name)
-		VALUES (?, ?, ?);`
-	res, err := db_instance.Exec(deleteUserStatement, user.Id, tripId, user.Name)
+	deleteUserStatement := `DELETE FROM users
+		WHERE trip_id=? and user_id=?;`
+	res, err := db_instance.Exec(deleteUserStatement, tripId, userId)
 	if err != nil {
 		slog.Error(err.Error())
 	}
 	if num_rows, _ := res.RowsAffected(); num_rows == 0 {
-		slog.Error(fmt.Sprintf("saving user did not result in insert: %#v", user))
+		slog.Error("couldn't delete user")
 	}
 }
 
