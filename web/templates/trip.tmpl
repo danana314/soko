@@ -10,8 +10,8 @@
     <link rel="stylesheet" type="text/css" href="/static/css/daisyui_4_10_2.full.min.css" />
     <script type="text/javascript" src="/static/js/htmx_1_9_12.min.js"></script>
   </head>
-  <body>
-    <h1>Welcome to Trip {{.Id}}</h1>
+  <body
+    x-data="{ tabSelected: 1 }">
     {{template "trip_detail" .}}
   </body>
 </html>
@@ -20,35 +20,32 @@
 {{block "trip_detail" .}}
 <div
       x-data="{
-          tabSelected: 1,
           tabId: $id('tabs'),
-          tabButtonClicked(tabButton){
-              this.tabSelected = tabButton.id.replace(this.tabId + '-', '');
-              this.tabRepositionMarker(tabButton);
+          tabClicked(tab){
+              this.tabSelected = tab.id.replace(this.tabId + '-', '');
+              this.tabRepositionMarker(tab);
           },
-          tabRepositionMarker(tabButton){
-              this.$refs.tabMarker.style.width=tabButton.offsetWidth + 'px';
-              this.$refs.tabMarker.style.height=tabButton.offsetHeight + 'px';
-              this.$refs.tabMarker.style.left=tabButton.offsetLeft + 'px';
+          tabRepositionMarker(tab){
+              this.$refs.tabMarker.style.width=tab.offsetWidth + 'px';
+              this.$refs.tabMarker.style.height=tab.offsetHeight + 'px';
+              this.$refs.tabMarker.style.left=tab.offsetLeft + 'px';
           },
           tabContentActive(tabContent){
               return this.tabSelected == tabContent.id.replace(this.tabId + '-content-', '');
           },
-          tabButtonActive(tabContent){
+          tabActive(tabContent){
               const tabId = tabContent.id.split('-').slice(-1);
               return this.tabSelected == tabId;
           }
         }"
-      x-init="tabRepositionMarker($refs.tabButtons.firstElementChild);"
+      x-init="tabRepositionMarker($refs.tabs.firstElementChild);"
       class="relative w-full"
       id="trip">
 
-      <div x-ref="tabButtons" class="relative inline-grid items-center justify-center w-full h-10 grid-cols-4 p-1 text-gray-500 bg-white border border-gray-100 rounded-lg select-none">
-          <button :id="$id(tabId)" @click="tabButtonClicked($el);" type="button" :class="{ 'bg-gray-100 text-gray-700' : tabButtonActive($el) }" class="relative z-20 inline-flex items-center justify-center w-full h-8 px-3 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap">Overview</button>
-          <button :id="$id(tabId)" @click="tabButtonClicked($el);" type="button" :class="{ 'bg-gray-100 text-gray-700' : tabButtonActive($el) }" class="relative z-20 inline-flex items-center justify-center w-full h-8 px-3 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap">Schedule</button>
-          <button :id="$id(tabId)" @click="tabButtonClicked($el);" type="button" :class="{ 'bg-gray-100 text-gray-700' : tabButtonActive($el) }" class="relative z-20 inline-flex items-center justify-center w-full h-8 px-3 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap">Packing List</button>
-          <button :id="$id(tabId)" @click="tabButtonClicked($el);" type="button" :class="{ 'bg-gray-100 text-gray-700' : tabButtonActive($el) }" class="relative z-20 inline-flex items-center justify-center w-full h-8 px-3 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap">Expenses</button>
-          <div x-ref="tabMarker" class="absolute left-0 z-10 w-1/2 h-full duration-300 ease-out" x-cloak><div class="w-full h-full bg-gray-100 rounded-md shadow-sm"></div></div>
+      <div x-ref="tabs" class="relative inline-grid items-center justify-center w-full h-10 grid-cols-4 p-1 text-gray-500 bg-white border border-gray-100 rounded-lg select-none">
+          <a :id="$id(tabId)" @click="tabClicked($el);" :class="{ 'bg-gray-100 text-gray-700' : tabActive($el) }" class="relative z-20 inline-flex items-center justify-center w-full h-8 px-3 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap">Overview</a>
+          <a :id="$id(tabId)" @click="tabClicked($el);" :class="{ 'bg-gray-100 text-gray-700' : tabActive($el) }" class="relative z-20 inline-flex items-center justify-center w-full h-8 px-3 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap">Schedule</a>
+          <a :id="$id(tabId)" @click="tabClicked($el);" :class="{ 'bg-gray-100 text-gray-700' : tabActive($el) }" class="relative z-20 inline-flex items-center justify-center w-full h-8 px-3 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap">Expenses</a>
       </div>
       <div class="relative flex items-center w-full p-5 mt-2 border rounded-md content border-gray-200/70">
         <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative">
@@ -57,10 +54,6 @@
 
         <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative">
           {{ template "schedule" . }}
-        </div>
-
-        <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative" x-cloak>
-          {{ template "packing_list" . }}
         </div>
 
         <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative" x-cloak>
@@ -130,10 +123,6 @@
     <button class="btn" type="submit">Update schedule</button>
       </form>
   </div>
-{{end}}
-
-{{block "packing_list" .}}
-Packing List
 {{end}}
 
 {{block "expenses" .}}
