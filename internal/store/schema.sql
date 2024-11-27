@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS schedule (
-    -- pk integer primary key autoincrement,
     trip_id text not null,
     user_id text not null,
     date date,
@@ -23,7 +22,7 @@ CREATE TABLE IF NOT EXISTS schedule (
 );
 
 CREATE TABLE IF NOT EXISTS expenses (
-	-- pk integer primary key autoincrement,
+    expense_id text primary key,
 	trip_id text not null,
 	date date,
 	description text,

@@ -67,17 +67,17 @@
 
 {{block "trip_overview" .}}
 <div class="border rounded-md border-gray-200/70">
-  <form class="text-left" hx-post="/t/{{.Id}}" hx-target="#trip" hx-swap="innerHTML">
+  <form class="text-left" hx-post="/t/{{.Trip.Id}}" hx-target="#trip" hx-swap="innerHTML">
     <label for="TripName">Trip name: </label>
     <input
-      {{ if .Name }} value="{{ .Name }}" {{ end }}
+      {{ if .Trip.Name }} value="{{ .Trip.Name }}" {{ end }}
       type="text" name="TripName" placeholder="trip name"><br/>
 
     <label for="StartDate">Start: </label>
-    <input type="date" name="StartDate" value="{{formatTime .StartDate}}"/><br/>
+    <input type="date" name="StartDate" value="{{formatTime .Trip.StartDate}}"/><br/>
 
     <label for="EndDate">End: </label>
-    <input type="date" name="EndDate" value="{{formatTime .EndDate}}"/><br/>
+    <input type="date" name="EndDate" value="{{formatTime .Trip.EndDate}}"/><br/>
     <button class="btn" type="submit">Update</button>
   </form>
 </div>
@@ -87,13 +87,13 @@
     {{range .Users}}
     <li>
       <div class="flex flex-row">
-        <img hx-delete="/t/{{$.Id}}/u/{{.Id}}" class="h-5 w-5" src="/static/img/delete.png" alt="delete user"/>
+        <img hx-delete="/t/{{$.Trip.Id}}/u/{{.Id}}" class="h-5 w-5" src="/static/img/delete.png" alt="delete user"/>
         {{.Name}}
       </div>
     </li>
   {{end}}
   </ul><br/>
-  <form hx-post="/t/{{.Id}}/u" hx-target="#trip" hx-swap="innerHTML">
+  <form hx-post="/t/{{.Trip.Id}}/u" hx-target="#trip" hx-swap="innerHTML">
     <div class="join">
         <input class="input input-bordered join-item" type="text" name="name" placeholder="Name">
         <button class="btn join-item" type="submit">Add user</button>
@@ -103,9 +103,8 @@
 {{end}}
 
 {{block "schedule" .}}
-  Who's coming when
   <div class="overflow-x-auto">
-    <form class="text-left" hx-post="/t/{{.Id}}/s" hx-target="#trip" hx-swap="innerHTML">
+    <form class="text-left" hx-post="/t/{{.Trip.Id}}/s" hx-target="#trip" hx-swap="innerHTML">
     <table class="table table-zebra table-xs table-pin-rows table-pin-cols">
       <thead>
         <th scope="col"></th>
@@ -114,13 +113,13 @@
         {{ end }}
       </thead>
       <tbody>
-        {{range $date := dateRange .StartDate .EndDate}}
+        {{range $date := dateRange .Trip.StartDate .Trip.EndDate}}
         <tr>
           <th scope="row">{{formatTime $date}}</th>
-          {{range $user := $.Users}}
-          {{$isBooked := $.IsBooked $user $date}}
-          <td><input type="checkbox" autocomplete="off" name="{{concatUserDate $user $date}}" {{if $isBooked }}checked{{end}}></td>
-          {{end}}
+            {{range $user := $.Users}}
+            {{$isBooked := $.IsBooked $user $date}}
+            <td><input type="checkbox" autocomplete="off" name="{{concatUserDate $user $date}}" {{if $isBooked }}checked{{end}}></td>
+            {{end}}
         </tr>
         {{end}}
       </tbody>
@@ -131,22 +130,46 @@
 {{end}}
 
 {{block "expenses" .}}
-<form>
-    <div class="join" hx-swap="outerHTML" hx-target="#expenses" hx-post="/t/{.Id}/e">
-        <label class="input input-bordered flex items-center gap-2 join-item">
-          Description
-          <input type="text" class="grow" name="description" placeholder="Enter a description" />
-        </label>
+<form hx-post="/t/{{.Trip.Id}}/e" hx-target="#trip" hx-swap="innerHTML">
+  <div class="join">
+      <label class="input input-bordered flex items-center gap-2 join-item">
+        Description
+        <input type="text" class="grow" name="description" placeholder="Enter a description" />
+      </label>
 
-        <label class="input input-bordered flex items-center gap-2 join-item">
-          Amount
-          <input type="number" class="grow" name="amount" placeholder="0.00" min="0.00" step="0.01"/>
-        </label>
+      <label class="input input-bordered flex items-center gap-2 join-item">
+        Amount
+        <input type="number" class="grow" name="amount" placeholder="0.00" min="0.00" step="0.01"/>
+      </label>
 
-        <button class="btn join-item" type="submit">Add Expense</button>
-    </div>
+      <button class="btn join-item" type="submit">Add Expense</button>
+  </div>
 </form>
 
-<div id="expenses">
+<div class="border rounded-md border-gray-200/70">
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-neutral-200">
+      <thead>
+        <tr class="text-neutral-500">
+          <th class="px-5 py-3 text-xs font-medium text-left uppercase">Date</th>
+          <th class="px-5 py-3 text-xs font-medium text-left uppercase">Description</th>
+          <th class="px-5 py-3 text-xs font-medium text-left uppercase">Amount</th>
+          <th class="px-5 py-3 text-xs font-medium text-right uppercase">Paid By</th>
+          <th class="px-5 py-3 text-xs font-medium text-right uppercase">Participants</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-neutral-200">
+        {{range .Expenses}}
+        <tr class="text-neutral-800">
+          <td class="px-5 py-4 text-sm font-medium whitespace-nowrap">{{.Date}}</td>
+          <td class="px-5 py-4 text-sm whitespace-nowrap">{{.Description}}</td>
+          <td class="px-5 py-4 text-sm whitespace-nowrap">{{.Amount}}</td>
+          <td class="px-5 py-4 text-sm whitespace-nowrap">{{.PaidBy}}</td>
+          <td class="px-5 py-4 text-sm whitespace-nowrap">{{.Participants}}</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
 </div>
 {{end}}

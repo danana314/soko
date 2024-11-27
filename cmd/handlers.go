@@ -70,17 +70,17 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 func NewTrip(w http.ResponseWriter, r *http.Request) {
 	trip := models.NewTrip()
-	store.AddOrUpdateTripDetails(trip)
+	store.SaveTrip(trip)
 	http.Redirect(w, r, fmt.Sprintf("/t/%s", trip.Id), http.StatusSeeOther)
 }
 
 func GetTrip(w http.ResponseWriter, r *http.Request) {
 	tripId := r.PathValue("tripId")
-	trip := store.GetTrip(tripId)
-	if trip == nil {
+	tripData := store.GetTripData(tripId)
+	if tripData == nil {
 		http.Error(w, "trip not found", http.StatusNotFound)
 	} else {
-		renderTemplate(templates, w, "trip", trip)
+		renderTemplate(templates, w, "trip", tripData)
 	}
 }
 
@@ -97,26 +97,26 @@ func UpdateTrip(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Error(err.Error(), "postform", r.PostForm)
 	}
-	store.AddOrUpdateTripDetails(trip)
-	trip = store.GetTrip(trip.Id)
-	renderTemplate(templates, w, "trip_detail", trip)
+	store.SaveTrip(trip)
+	tripData := store.GetTripData(trip.Id)
+	renderTemplate(templates, w, "trip_detail", tripData)
 }
 
 func AddUser(w http.ResponseWriter, r *http.Request) {
 	tripId := r.PathValue("tripId")
-	trip := store.GetTrip(tripId)
 
 	name := r.PostFormValue("name")
 	user := models.NewUser()
 	user.Name = name
 	store.AddUser(tripId, user)
-	trip.Users = append(trip.Users, *user)
-	renderTemplate(templates, w, "trip_detail", trip)
+
+	tripData := store.GetTripData(tripId)
+	renderTemplate(templates, w, "trip_detail", tripData)
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	tripId := r.PathValue("tripId")
-	trip := store.GetTrip(tripId)
+	trip := store.GetTripData(tripId)
 
 	// TODO can only delete if not involved in expenses - check!
 
@@ -130,17 +130,18 @@ func UpdateSchedule(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Error(err.Error())
 	}
-	trip := store.GetTrip(tripId)
-	trip.Schedule = make([]models.ScheduleEntry, 0)
+	schedule := make([]*models.ScheduleEntry, 0)
+	users := store.GetUsers(tripId)
 	for k := range r.PostForm {
-		se, err := trip.NewScheduleEntry(k)
+		se, err := models.NewScheduleEntry(users, k)
 		if err != nil {
 			slog.Error(err.Error())
 		}
-		trip.Schedule = append(trip.Schedule, *se)
+		schedule = append(schedule, se)
 	}
-	store.SaveSchedule(trip)
-	renderTemplate(templates, w, "trip_detail", trip)
+	store.SaveSchedule(tripId, schedule)
+	tripData := store.GetTripData(tripId)
+	renderTemplate(templates, w, "trip_detail", tripData)
 }
 
 func NewExpense(w http.ResponseWriter, r *http.Request) {
@@ -154,8 +155,7 @@ func NewExpense(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Error(err.Error(), "postform", r.PostForm)
 	}
-	trip := store.GetTrip(tripId)
-	trip.Expenses = append(trip.Expenses, *expense)
-	slog.Info(fmt.Sprintf("%#v", trip))
-	renderTemplate(templates, w, "trip_detail", trip)
+	store.SaveExpense(tripId, expense)
+	tripData := store.GetTripData(tripId)
+	renderTemplate(templates, w, "trip_detail", tripData)
 }
