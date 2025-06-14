@@ -131,18 +131,46 @@
 
 {{block "expenses" .}}
 <form hx-post="/t/{{.Trip.Id}}/e" hx-target="#trip" hx-swap="innerHTML">
-  <div class="join">
-      <label class="input input-bordered flex items-center gap-2 join-item">
+  <div class="space-y-4 p-4 border rounded-md border-gray-200/70">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <label class="input input-bordered flex items-center gap-2">
         Description
-        <input type="text" class="grow" name="description" placeholder="Enter a description" />
+        <input type="text" class="grow" name="description" placeholder="Enter a description" required />
       </label>
 
-      <label class="input input-bordered flex items-center gap-2 join-item">
+      <label class="input input-bordered flex items-center gap-2">
         Amount
-        <input type="number" class="grow" name="amount" placeholder="0.00" min="0.00" step="0.01"/>
+        <input type="number" class="grow" name="amount" placeholder="0.00" min="0.01" step="0.01" required/>
       </label>
 
-      <button class="btn join-item" type="submit">Add Expense</button>
+      <label class="input input-bordered flex items-center gap-2">
+        Date
+        <input type="date" class="grow" name="date" value="{{formatTime now}}" required/>
+      </label>
+
+      <select name="paidBy" class="select select-bordered" required>
+        <option value="">Who paid?</option>
+        {{range .Users}}
+        <option value="{{.Id}}">{{.Name}}</option>
+        {{end}}
+      </select>
+    </div>
+
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text">Split among:</span>
+      </label>
+      <div class="flex flex-wrap gap-2">
+        {{range .Users}}
+        <label class="label cursor-pointer">
+          <input type="checkbox" name="participants" value="{{.Id}}" class="checkbox checkbox-sm" />
+          <span class="label-text ml-2">{{.Name}}</span>
+        </label>
+        {{end}}
+      </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Add Expense</button>
   </div>
 </form>
 
@@ -161,11 +189,15 @@
       <tbody class="divide-y divide-neutral-200">
         {{range .Expenses}}
         <tr class="text-neutral-800">
-          <td class="px-5 py-4 text-sm font-medium whitespace-nowrap">{{.Date}}</td>
+          <td class="px-5 py-4 text-sm font-medium whitespace-nowrap">{{formatTime .Date}}</td>
           <td class="px-5 py-4 text-sm whitespace-nowrap">{{.Description}}</td>
-          <td class="px-5 py-4 text-sm whitespace-nowrap">{{.Amount}}</td>
-          <td class="px-5 py-4 text-sm whitespace-nowrap">{{.PaidBy}}</td>
-          <td class="px-5 py-4 text-sm whitespace-nowrap">{{.Participants}}</td>
+          <td class="px-5 py-4 text-sm whitespace-nowrap text-right">${{.Amount}}</td>
+          <td class="px-5 py-4 text-sm whitespace-nowrap text-right">{{.PaidBy.Name}}</td>
+          <td class="px-5 py-4 text-sm whitespace-nowrap text-right">
+            {{range $i, $participant := .Participants}}
+              {{if $i}}, {{end}}{{$participant.Name}}
+            {{end}}
+          </td>
         </tr>
         {{end}}
       </tbody>

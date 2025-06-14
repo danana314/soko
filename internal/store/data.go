@@ -4,6 +4,7 @@ import (
 	"1008001/splitwiser/internal/models"
 	"1008001/splitwiser/internal/util"
 	_ "embed"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 )
@@ -155,9 +156,10 @@ func SaveSchedule(tripId string, schedule []*models.ScheduleEntry) {
 func GetExpenses(tripId string) []*models.Expense {
 	getExpensesStatement := `
 		SELECT
-			expense_id, date, description, amount, paid_by_user_id, participants
-		FROM expenses
-		WHERE trip_id=?;`
+			e.expense_id, e.date, e.description, e.amount, e.paid_by_user_id, u.name, e.participants
+		FROM expenses e
+			LEFT JOIN users u ON e.paid_by_user_id = u.user_id
+		WHERE e.trip_id=?;`
 	expenses := make([]*models.Expense, 0)
 
 	rows, err := db_instance.Query(getExpensesStatement, tripId)
@@ -169,9 +171,18 @@ func GetExpenses(tripId string) []*models.Expense {
 	defer rows.Close()
 	for rows.Next() {
 		var expense models.Expense
-		if err := rows.Scan(&expense.Id, &expense.Date, &expense.Description, &expense.Amount, &expense.PaidBy.Id, &expense.Participants); err != nil {
+		var participantsJSON []byte
+		if err := rows.Scan(&expense.Id, &expense.Date, &expense.Description, &expense.Amount, &expense.PaidBy.Id, &expense.PaidBy.Name, &participantsJSON); err != nil {
 			slog.Error(err.Error())
+			continue
 		}
+		
+		if len(participantsJSON) > 0 {
+			if err := json.Unmarshal(participantsJSON, &expense.Participants); err != nil {
+				slog.Error("Failed to unmarshal participants", "error", err.Error())
+			}
+		}
+		
 		expenses = append(expenses, &expense)
 	}
 	if err := rows.Err(); err != nil {
@@ -190,10 +201,17 @@ func SaveExpense(tripId string, expense *models.Expense) {
 			date=excluded.date,
 			description=excluded.description,
 			amount=excluded.amount,
-			paid_by_user=excluded.paid_by_user,
+			paid_by_user_id=excluded.paid_by_user_id,
 			participants=excluded.participants;
 	`
-	err := exec(db_instance, insertExpenseStatement, expense.Id, tripId, expense.Date, expense.Description, expense.Amount, expense.PaidBy.Id, expense.Participants)
+	
+	participantsJSON, err := json.Marshal(expense.Participants)
+	if err != nil {
+		slog.Error("Failed to marshal participants", "error", err.Error())
+		participantsJSON = []byte("[]")
+	}
+	
+	err = exec(db_instance, insertExpenseStatement, expense.Id, tripId, expense.Date, expense.Description, expense.Amount, expense.PaidBy.Id, string(participantsJSON))
 	if err != nil {
 		slog.Error(err.Error())
 	}

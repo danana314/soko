@@ -26,9 +26,9 @@ CREATE TABLE IF NOT EXISTS expenses (
 	trip_id text not null,
 	date date,
 	description text,
-	amount decimal(10,2),
+	amount text,
 	paid_by_user_id text,
-	participants blob,
+	participants text,
 	foreign key(trip_id) references trips(trip_id),
 	foreign key(paid_by_user_id) references users(user_id)
 );

@@ -35,7 +35,7 @@ type Expense struct {
 	Id           string
 	Date         time.Time
 	Description  string
-	Amount       int64
+	Amount       string
 	PaidBy       User
 	Participants []User
 }

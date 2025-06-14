@@ -150,11 +150,47 @@ func NewExpense(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Error(err.Error())
 	}
-	expense := new(models.Expense)
-	err = decoder.Decode(expense, r.PostForm)
-	if err != nil {
-		slog.Error(err.Error(), "postform", r.PostForm)
+
+	expense := models.NewExpense()
+	
+	expense.Description = r.PostFormValue("description")
+	expense.Amount = r.PostFormValue("amount")
+	
+	dateStr := r.PostFormValue("date")
+	if dateStr != "" {
+		if expense.Date, err = time.Parse("2006-01-02", dateStr); err != nil {
+			slog.Error(err.Error())
+			expense.Date = time.Now()
+		}
+	} else {
+		expense.Date = time.Now()
 	}
+
+	paidByUserId := r.PostFormValue("paidBy")
+	if paidByUserId != "" {
+		users := store.GetUsers(tripId)
+		for _, user := range users {
+			if user.Id == paidByUserId {
+				expense.PaidBy = *user
+				break
+			}
+		}
+	}
+
+	participantIds := r.PostForm["participants"]
+	if len(participantIds) > 0 {
+		users := store.GetUsers(tripId)
+		expense.Participants = make([]models.User, 0, len(participantIds))
+		for _, participantId := range participantIds {
+			for _, user := range users {
+				if user.Id == participantId {
+					expense.Participants = append(expense.Participants, *user)
+					break
+				}
+			}
+		}
+	}
+
 	store.SaveExpense(tripId, expense)
 	tripData := store.GetTripData(tripId)
 	renderTemplate(templates, w, "trip_detail", tripData)

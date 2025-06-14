@@ -38,7 +38,7 @@ func SeedDB(store *DB) {
 		Id:           "testexpense1",
 		Date:         time.Date(2024, time.January, 15, 0, 0, 0, 0, time.Local),
 		Description:  "food at restaurant",
-		Amount:       2034,
+		Amount:       "20.34",
 		PaidBy:       user1,
 		Participants: []models.User{user1, user2},
 	})
@@ -47,7 +47,7 @@ func SeedDB(store *DB) {
 		Id:           "testexpense2",
 		Date:         time.Date(2024, time.January, 21, 0, 0, 0, 0, time.Local),
 		Description:  "food at another restaurant",
-		Amount:       2034,
+		Amount:       "20.34",
 		PaidBy:       user2,
 		Participants: []models.User{user1, user3},
 	})
