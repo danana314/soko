@@ -66,142 +66,289 @@
 {{end}}
 
 {{block "trip_overview" .}}
-<div class="border rounded-md border-gray-200/70">
-  <form class="text-left" hx-post="/t/{{.Trip.Id}}" hx-target="#trip" hx-swap="innerHTML">
-    <label for="TripName">Trip name: </label>
-    <input
-      {{ if .Trip.Name }} value="{{ .Trip.Name }}" {{ end }}
-      type="text" name="TripName" placeholder="trip name"><br/>
+<div class="space-y-6">
+  <!-- Trip Details Card -->
+  <div class="card bg-base-100 shadow-sm border border-gray-200/70">
+    <div class="card-body">
+      <h3 class="card-title text-lg mb-4">Trip Details</h3>
+      <form class="space-y-4" hx-post="/t/{{.Trip.Id}}" hx-target="#trip" hx-swap="innerHTML">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Trip name</span>
+          </label>
+          <input 
+            type="text" 
+            name="TripName" 
+            class="input input-bordered w-full" 
+            placeholder="Enter trip name"
+            {{ if .Trip.Name }} value="{{ .Trip.Name }}" {{ end }} />
+        </div>
 
-    <label for="StartDate">Start: </label>
-    <input type="date" name="StartDate" value="{{formatTime .Trip.StartDate}}"/><br/>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Start date</span>
+            </label>
+            <input 
+              type="date" 
+              name="StartDate" 
+              class="input input-bordered w-full"
+              value="{{formatTime .Trip.StartDate}}" />
+          </div>
 
-    <label for="EndDate">End: </label>
-    <input type="date" name="EndDate" value="{{formatTime .Trip.EndDate}}"/><br/>
-    <button class="btn" type="submit">Update</button>
-  </form>
-</div>
-<div class="border rounded-md border-gray-200/70">
-  <label>Friends: </label><br/>
-  <ul class="list-inside">
-    {{range .Users}}
-    <li>
-      <div class="flex flex-row">
-        <img hx-delete="/t/{{$.Trip.Id}}/u/{{.Id}}" class="h-5 w-5" src="/static/img/delete.png" alt="delete user"/>
-        {{.Name}}
-      </div>
-    </li>
-  {{end}}
-  </ul><br/>
-  <form hx-post="/t/{{.Trip.Id}}/u" hx-target="#trip" hx-swap="innerHTML">
-    <div class="join">
-        <input class="input input-bordered join-item" type="text" name="name" placeholder="Name">
-        <button class="btn join-item" type="submit">Add user</button>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">End date</span>
+            </label>
+            <input 
+              type="date" 
+              name="EndDate" 
+              class="input input-bordered w-full"
+              value="{{formatTime .Trip.EndDate}}" />
+          </div>
+        </div>
+
+        <div class="card-actions justify-end">
+          <button class="btn btn-primary" type="submit">Update Trip</button>
+        </div>
+      </form>
     </div>
-  </form>
+  </div>
+
+  <!-- Friends Card -->
+  <div class="card bg-base-100 shadow-sm border border-gray-200/70">
+    <div class="card-body">
+      <h3 class="card-title text-lg mb-4">Friends</h3>
+      
+      {{if .Users}}
+      <div class="space-y-2 mb-4">
+        {{range .Users}}
+        <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+          <span class="font-medium">{{.Name}}</span>
+          <button 
+            hx-delete="/t/{{$.Trip.Id}}/u/{{.Id}}" 
+            hx-target="#trip" 
+            hx-swap="innerHTML"
+            hx-confirm="Remove {{.Name}} from this trip?"
+            class="btn btn-ghost btn-sm text-error hover:bg-error hover:text-error-content">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </button>
+        </div>
+        {{end}}
+      </div>
+      {{else}}
+      <div class="text-center py-6 text-gray-500">
+        <p>No friends added yet</p>
+      </div>
+      {{end}}
+
+      <form hx-post="/t/{{.Trip.Id}}/u" hx-target="#trip" hx-swap="innerHTML">
+        <div class="join w-full">
+          <input 
+            class="input input-bordered join-item flex-1" 
+            type="text" 
+            name="name" 
+            placeholder="Add a friend"
+            required />
+          <button class="btn btn-primary join-item" type="submit">Add Friend</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 {{end}}
 
 {{block "schedule" .}}
-  <div class="overflow-x-auto">
-    <form class="text-left" hx-post="/t/{{.Trip.Id}}/s" hx-target="#trip" hx-swap="innerHTML">
-    <table class="table table-zebra table-xs table-pin-rows table-pin-cols">
-      <thead>
-        <th scope="col"></th>
-        {{range .Users}}
-        <th scope="col">{{.Name}}</th>
-        {{ end }}
-      </thead>
-      <tbody>
-        {{range $date := dateRange .Trip.StartDate .Trip.EndDate}}
-        <tr>
-          <th scope="row">{{formatTime $date}}</th>
-            {{range $user := $.Users}}
-            {{$isBooked := $.IsBooked $user $date}}
-            <td><input type="checkbox" autocomplete="off" name="{{concatUserDate $user $date}}" {{if $isBooked }}checked{{end}}></td>
+<div class="card bg-base-100 shadow-sm border border-gray-200/70">
+  <div class="card-body">
+    <h3 class="card-title text-lg mb-4">Schedule & Availability</h3>
+    
+    {{if .Users}}
+    <form hx-post="/t/{{.Trip.Id}}/s" hx-target="#trip" hx-swap="innerHTML">
+      <div class="overflow-x-auto mb-4">
+        <table class="table table-zebra table-xs table-pin-rows table-pin-cols">
+          <thead>
+            <tr>
+              <th scope="col" class="bg-base-200">Date</th>
+              {{range .Users}}
+              <th scope="col" class="bg-base-200 text-center">{{.Name}}</th>
+              {{end}}
+            </tr>
+          </thead>
+          <tbody>
+            {{range $date := dateRange .Trip.StartDate .Trip.EndDate}}
+            <tr>
+              <th scope="row" class="font-medium">{{formatTime $date}}</th>
+              {{range $user := $.Users}}
+              {{$isBooked := $.IsBooked $user $date}}
+              <td class="text-center">
+                <input 
+                  type="checkbox" 
+                  class="checkbox checkbox-sm checkbox-primary" 
+                  autocomplete="off" 
+                  name="{{concatUserDate $user $date}}" 
+                  {{if $isBooked }}checked{{end}} />
+              </td>
+              {{end}}
+            </tr>
             {{end}}
-        </tr>
-        {{end}}
-      </tbody>
-    </table>
-    <button class="btn" type="submit">Update schedule</button>
-      </form>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="card-actions justify-end">
+        <button class="btn btn-primary" type="submit">Update Schedule</button>
+      </div>
+    </form>
+    {{else}}
+    <div class="text-center py-8 text-gray-500">
+      <p>Add friends first to manage the schedule</p>
+      <p class="text-sm mt-2">Go to the Overview tab to add friends to this trip</p>
+    </div>
+    {{end}}
   </div>
+</div>
 {{end}}
 
 {{block "expenses" .}}
-<form hx-post="/t/{{.Trip.Id}}/e" hx-target="#trip" hx-swap="innerHTML">
-  <div class="space-y-4 p-4 border rounded-md border-gray-200/70">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <label class="input input-bordered flex items-center gap-2">
-        Description
-        <input type="text" class="grow" name="description" placeholder="Enter a description" required />
-      </label>
+<div class="space-y-6">
+  <!-- Add Expense Card -->
+  <div class="card bg-base-100 shadow-sm border border-gray-200/70">
+    <div class="card-body">
+      <h3 class="card-title text-lg mb-4">Add New Expense</h3>
+      
+      {{if .Users}}
+      <form hx-post="/t/{{.Trip.Id}}/e" hx-target="#trip" hx-swap="innerHTML">
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Description</span>
+              </label>
+              <input 
+                type="text" 
+                class="input input-bordered w-full" 
+                name="description" 
+                placeholder="Enter description" 
+                required />
+            </div>
 
-      <label class="input input-bordered flex items-center gap-2">
-        Amount
-        <input type="number" class="grow" name="amount" placeholder="0.00" min="0.01" step="0.01" required/>
-      </label>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Amount</span>
+              </label>
+              <input 
+                type="number" 
+                class="input input-bordered w-full" 
+                name="amount" 
+                placeholder="0.00" 
+                min="0.01" 
+                step="0.01" 
+                required />
+            </div>
 
-      <label class="input input-bordered flex items-center gap-2">
-        Date
-        <input type="date" class="grow" name="date" value="{{formatTime now}}" required/>
-      </label>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Date</span>
+              </label>
+              <input 
+                type="date" 
+                class="input input-bordered w-full" 
+                name="date" 
+                value="{{formatTime now}}" 
+                required />
+            </div>
 
-      <select name="paidBy" class="select select-bordered" required>
-        <option value="">Who paid?</option>
-        {{range .Users}}
-        <option value="{{.Id}}">{{.Name}}</option>
-        {{end}}
-      </select>
-    </div>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Who paid?</span>
+              </label>
+              <select name="paidBy" class="select select-bordered w-full" required>
+                <option value="">Select person</option>
+                {{range .Users}}
+                <option value="{{.Id}}">{{.Name}}</option>
+                {{end}}
+              </select>
+            </div>
+          </div>
 
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text">Split among:</span>
-      </label>
-      <div class="flex flex-wrap gap-2">
-        {{range .Users}}
-        <label class="label cursor-pointer">
-          <input type="checkbox" name="participants" value="{{.Id}}" class="checkbox checkbox-sm" />
-          <span class="label-text ml-2">{{.Name}}</span>
-        </label>
-        {{end}}
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Split among</span>
+            </label>
+            <div class="flex flex-wrap gap-3">
+              {{range .Users}}
+              <label class="label cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  name="participants" 
+                  value="{{.Id}}" 
+                  class="checkbox checkbox-primary checkbox-sm mr-2" />
+                <span class="label-text">{{.Name}}</span>
+              </label>
+              {{end}}
+            </div>
+          </div>
+
+          <div class="card-actions justify-end">
+            <button class="btn btn-primary" type="submit">Add Expense</button>
+          </div>
+        </div>
+      </form>
+      {{else}}
+      <div class="text-center py-6 text-gray-500">
+        <p>Add friends first to track expenses</p>
+        <p class="text-sm mt-2">Go to the Overview tab to add friends to this trip</p>
       </div>
+      {{end}}
     </div>
-
-    <button class="btn btn-primary" type="submit">Add Expense</button>
   </div>
-</form>
 
-<div class="border rounded-md border-gray-200/70">
-  <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-neutral-200">
-      <thead>
-        <tr class="text-neutral-500">
-          <th class="px-5 py-3 text-xs font-medium text-left uppercase">Date</th>
-          <th class="px-5 py-3 text-xs font-medium text-left uppercase">Description</th>
-          <th class="px-5 py-3 text-xs font-medium text-left uppercase">Amount</th>
-          <th class="px-5 py-3 text-xs font-medium text-right uppercase">Paid By</th>
-          <th class="px-5 py-3 text-xs font-medium text-right uppercase">Participants</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-neutral-200">
-        {{range .Expenses}}
-        <tr class="text-neutral-800">
-          <td class="px-5 py-4 text-sm font-medium whitespace-nowrap">{{formatTime .Date}}</td>
-          <td class="px-5 py-4 text-sm whitespace-nowrap">{{.Description}}</td>
-          <td class="px-5 py-4 text-sm whitespace-nowrap text-right">${{.Amount}}</td>
-          <td class="px-5 py-4 text-sm whitespace-nowrap text-right">{{.PaidBy.Name}}</td>
-          <td class="px-5 py-4 text-sm whitespace-nowrap text-right">
-            {{range $i, $participant := .Participants}}
-              {{if $i}}, {{end}}{{$participant.Name}}
+  <!-- Expenses List Card -->
+  <div class="card bg-base-100 shadow-sm border border-gray-200/70">
+    <div class="card-body">
+      <h3 class="card-title text-lg mb-4">Expense History</h3>
+      
+      {{if .Expenses}}
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th class="text-right">Amount</th>
+              <th class="text-right">Paid By</th>
+              <th class="text-right">Participants</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{range .Expenses}}
+            <tr>
+              <td class="font-medium">{{formatTime .Date}}</td>
+              <td>{{.Description}}</td>
+              <td class="text-right font-mono">${{.Amount}}</td>
+              <td class="text-right">{{.PaidBy.Name}}</td>
+              <td class="text-right">
+                <div class="text-sm">
+                  {{range $i, $participant := .Participants}}
+                    {{if $i}}, {{end}}{{$participant.Name}}
+                  {{end}}
+                </div>
+              </td>
+            </tr>
             {{end}}
-          </td>
-        </tr>
-        {{end}}
-      </tbody>
-    </table>
+          </tbody>
+        </table>
+      </div>
+      {{else}}
+      <div class="text-center py-8 text-gray-500">
+        <p>No expenses recorded yet</p>
+        <p class="text-sm mt-2">Add your first expense above to get started</p>
+      </div>
+      {{end}}
+    </div>
   </div>
 </div>
 {{end}}
