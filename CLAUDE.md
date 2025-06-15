@@ -9,7 +9,7 @@ This is a trip expense sharing application called "Soko" built with Go, SQLite, 
 - **Backend**: Go with standard library HTTP server
 - **Database**: SQLite with schema in `internal/store/schema.sql`
 - **Frontend**: HTMX + Alpine.js with server-side templates
-- **Styling**: Tailwind CSS + DaisyUI
+- **Styling**: Tailwind CSS with custom Sardinian color palette
 
 ## Key Files
 - `cmd/handlers.go` - HTTP handlers for all routes
@@ -36,6 +36,7 @@ This is a trip expense sharing application called "Soko" built with Go, SQLite, 
 - Template functions are in `internal/funcs/funcs.go`
 - Database operations use prepared statements
 - JSON is used for complex data in SQLite (like expense participants)
+- Use Sardinian color palette: sardinia-orange (apricot #f6b55f), sardinia-turquoise, sardinia-terracotta, sardinia-cream, etc.
 
 ## Common Tasks
 - **Adding routes**: Update `cmd/handlers.go` routes() function
@@ -49,3 +50,5 @@ This is a trip expense sharing application called "Soko" built with Go, SQLite, 
 - Participants in expenses are stored as JSON arrays
 - HTMX is used for dynamic updates without page reloads
 - Alpine.js handles client-side interactivity (tabs, etc.)
+- Uses custom Sardinian color theme inspired by Mediterranean aesthetics
+- No DaisyUI - pure Tailwind CSS with custom components

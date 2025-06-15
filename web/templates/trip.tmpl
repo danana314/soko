@@ -1,65 +1,74 @@
 {{block "trip" . }}
 <!DOCTYPE html>
-<html lang="en" data-theme="lofi">
+<html lang="en" class="bg-sardinia-cream">
   <head>
     <title>tripwiser</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script defer type="text/javascript" src="/static/js/alpinejs_3_14_1.min.js"></script>
-    <script src="/static/js/tailwind_3_4_5.es"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/daisyui_4_10_2.full.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'sardinia': {
+                'orange': '#f6b55f',
+                'turquoise': '#20B2AA', 
+                'purple': '#9370DB',
+                'terracotta': '#A0522D',
+                'cream': '#FDF5E6',
+                'sand': '#F4A460',
+                'sage': '#9CAF88',
+                'blue': '#4682B4'
+              }
+            }
+          }
+        }
+      }
+    </script>
     <script type="text/javascript" src="/static/js/htmx_1_9_12.min.js"></script>
   </head>
-  <body
-    x-data="{ tabSelected: 1 }">
+  <body class="bg-sardinia-cream text-sardinia-terracotta min-h-screen">
     {{template "trip_detail" .}}
   </body>
 </html>
 {{end}}
 
 {{block "trip_detail" .}}
-<div
+<div class="max-w-6xl mx-auto p-6"
       x-data="{
-          tabId: $id('tabs'),
-          tabClicked(tab){
-              this.tabSelected = tab.id.replace(this.tabId + '-', '');
-              this.tabRepositionMarker(tab);
-          },
-          tabRepositionMarker(tab){
-              this.$refs.tabMarker.style.width=tab.offsetWidth + 'px';
-              this.$refs.tabMarker.style.height=tab.offsetHeight + 'px';
-              this.$refs.tabMarker.style.left=tab.offsetLeft + 'px';
-          },
-          tabContentActive(tabContent){
-              return this.tabSelected == tabContent.id.replace(this.tabId + '-content-', '');
-          },
-          tabActive(tabContent){
-              const tabId = tabContent.id.split('-').slice(-1);
-              return this.tabSelected == tabId;
+          tabSelected: '1',
+          setTab(tabNumber) {
+              this.tabSelected = tabNumber.toString();
           }
         }"
-      x-init="tabRepositionMarker($refs.tabs.firstElementChild);"
-      class="relative w-full"
       id="trip">
 
-      <div x-ref="tabs" class="relative inline-grid items-center justify-center w-full h-10 grid-cols-4 p-1 text-gray-500 bg-white border border-gray-100 rounded-lg select-none">
-          <a :id="$id(tabId)" @click="tabClicked($el);" :class="{ 'bg-gray-100 text-gray-700' : tabActive($el) }" class="relative z-20 inline-flex items-center justify-center w-full h-8 px-3 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap">Overview</a>
-          <a :id="$id(tabId)" @click="tabClicked($el);" :class="{ 'bg-gray-100 text-gray-700' : tabActive($el) }" class="relative z-20 inline-flex items-center justify-center w-full h-8 px-3 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap">Schedule</a>
-          <a :id="$id(tabId)" @click="tabClicked($el);" :class="{ 'bg-gray-100 text-gray-700' : tabActive($el) }" class="relative z-20 inline-flex items-center justify-center w-full h-8 px-3 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap">Expenses</a>
+      <div class="relative inline-grid items-center justify-center w-full h-12 grid-cols-3 p-1 bg-white border border-sardinia-terracotta/20 rounded-lg select-none shadow-sm">
+          <a @click="setTab('1')" :class="{ 'bg-sardinia-orange text-white shadow-md' : tabSelected === '1' }" class="relative z-20 inline-flex items-center justify-center w-full h-10 px-4 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap text-sardinia-terracotta hover:bg-sardinia-terracotta/10 border border-transparent hover:border-sardinia-terracotta/20">Overview</a>
+          <a @click="setTab('2')" :class="{ 'bg-sardinia-orange text-white shadow-md' : tabSelected === '2' }" class="relative z-20 inline-flex items-center justify-center w-full h-10 px-4 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap text-sardinia-terracotta hover:bg-sardinia-terracotta/10 border border-transparent hover:border-sardinia-terracotta/20">Schedule</a>
+          <a @click="setTab('3')" :class="{ 'bg-sardinia-orange text-white shadow-md' : tabSelected === '3' }" class="relative z-20 inline-flex items-center justify-center w-full h-10 px-4 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap text-sardinia-terracotta hover:bg-sardinia-terracotta/10 border border-transparent hover:border-sardinia-terracotta/20">Expenses</a>
       </div>
-      <div class="relative flex items-center w-full p-5 mt-2 border rounded-md content border-gray-200/70">
-        <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative">
-          {{ template "trip_overview" . }}
-        </div>
+      
+      <div class="relative w-full mt-4">
+        <template x-if="tabSelected === '1'">
+          <div class="p-6 bg-white border border-sardinia-terracotta/20 rounded-lg shadow-sm">
+            {{ template "trip_overview" . }}
+          </div>
+        </template>
 
-        <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative">
-          {{ template "schedule" . }}
-        </div>
+        <template x-if="tabSelected === '2'">
+          <div class="p-6 bg-white border border-sardinia-terracotta/20 rounded-lg shadow-sm">
+            {{ template "schedule" . }}
+          </div>
+        </template>
 
-        <div :id="$id(tabId + '-content')" x-show="tabContentActive($el)" class="relative" x-cloak>
-          {{ template "expenses" . }}
-        </div>
-
+        <template x-if="tabSelected === '3'">
+          <div class="p-6 bg-white border border-sardinia-terracotta/20 rounded-lg shadow-sm">
+            {{ template "expenses" . }}
+          </div>
+        </template>
       </div>
     </div>
 
@@ -68,69 +77,61 @@
 {{block "trip_overview" .}}
 <div class="space-y-6">
   <!-- Trip Details Card -->
-  <div class="card bg-base-100 shadow-sm border border-gray-200/70">
-    <div class="card-body">
-      <h3 class="card-title text-lg mb-4">Trip Details</h3>
+  <div class="bg-white p-6 rounded-lg border border-sardinia-terracotta/20 shadow-sm">
+    <h3 class="text-xl font-semibold text-sardinia-terracotta mb-6 pb-3 border-b border-sardinia-terracotta/10">Trip Details</h3>
       <form class="space-y-4" hx-post="/t/{{.Trip.Id}}" hx-target="#trip" hx-swap="innerHTML">
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Trip name</span>
-          </label>
+        <div>
+          <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Trip name</label>
           <input 
             type="text" 
             name="TripName" 
-            class="input input-bordered w-full" 
+            class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50" 
             placeholder="Enter trip name"
             {{ if .Trip.Name }} value="{{ .Trip.Name }}" {{ end }} />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Start date</span>
-            </label>
+          <div>
+            <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Start date</label>
             <input 
               type="date" 
               name="StartDate" 
-              class="input input-bordered w-full"
+              class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50"
               value="{{formatTime .Trip.StartDate}}" />
           </div>
 
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">End date</span>
-            </label>
+          <div>
+            <label class="block text-sm font-medium text-sardinia-terracotta mb-2">End date</label>
             <input 
               type="date" 
               name="EndDate" 
-              class="input input-bordered w-full"
+              class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50"
               value="{{formatTime .Trip.EndDate}}" />
           </div>
         </div>
 
-        <div class="card-actions justify-end">
-          <button class="btn btn-primary" type="submit">Update Trip</button>
+        <div class="flex justify-end">
+          <button class="px-6 py-2 bg-sardinia-turquoise text-white rounded-md hover:bg-sardinia-turquoise/90 focus:outline-none focus:ring-2 focus:ring-sardinia-turquoise focus:ring-offset-2 transition-colors" type="submit">Update Trip</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- Friends Card -->
-  <div class="card bg-base-100 shadow-sm border border-gray-200/70">
-    <div class="card-body">
-      <h3 class="card-title text-lg mb-4">Friends</h3>
+  <div class="bg-white p-6 rounded-lg border border-sardinia-terracotta/20 shadow-sm">
+    <h3 class="text-xl font-semibold text-sardinia-terracotta mb-6 pb-3 border-b border-sardinia-terracotta/10">Friends</h3>
       
       {{if .Users}}
       <div class="space-y-2 mb-4">
         {{range .Users}}
-        <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
-          <span class="font-medium">{{.Name}}</span>
+        <div class="flex items-center justify-between p-3 bg-sardinia-terracotta/5 border border-sardinia-terracotta/10 rounded-lg hover:bg-sardinia-terracotta/10 transition-colors">
+          <span class="font-medium text-sardinia-terracotta">{{.Name}}</span>
           <button 
             hx-delete="/t/{{$.Trip.Id}}/u/{{.Id}}" 
             hx-target="#trip" 
             hx-swap="innerHTML"
             hx-confirm="Remove {{.Name}} from this trip?"
-            class="btn btn-ghost btn-sm text-error hover:bg-error hover:text-error-content">
+            class="p-1 text-red-500 hover:bg-red-100 rounded transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
             </svg>
@@ -145,14 +146,14 @@
       {{end}}
 
       <form hx-post="/t/{{.Trip.Id}}/u" hx-target="#trip" hx-swap="innerHTML">
-        <div class="join w-full">
+        <div class="flex gap-2">
           <input 
-            class="input input-bordered join-item flex-1" 
+            class="flex-1 px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50" 
             type="text" 
             name="name" 
             placeholder="Add a friend"
             required />
-          <button class="btn btn-primary join-item" type="submit">Add Friend</button>
+          <button class="px-4 py-2 bg-sardinia-turquoise text-white rounded-md hover:bg-sardinia-turquoise/90 focus:outline-none focus:ring-2 focus:ring-sardinia-turquoise focus:ring-offset-2 transition-colors" type="submit">Add Friend</button>
         </div>
       </form>
     </div>
@@ -161,87 +162,80 @@
 {{end}}
 
 {{block "schedule" .}}
-<div class="card bg-base-100 shadow-sm border border-gray-200/70">
-  <div class="card-body">
-    <h3 class="card-title text-lg mb-4">Schedule & Availability</h3>
-    
-    {{if .Users}}
-    <form hx-post="/t/{{.Trip.Id}}/s" hx-target="#trip" hx-swap="innerHTML">
-      <div class="overflow-x-auto mb-4">
-        <table class="table table-zebra table-xs table-pin-rows table-pin-cols">
-          <thead>
-            <tr>
-              <th scope="col" class="bg-base-200">Date</th>
-              {{range .Users}}
-              <th scope="col" class="bg-base-200 text-center">{{.Name}}</th>
-              {{end}}
-            </tr>
-          </thead>
-          <tbody>
-            {{range $date := dateRange .Trip.StartDate .Trip.EndDate}}
-            <tr>
-              <th scope="row" class="font-medium">{{formatTime $date}}</th>
-              {{range $user := $.Users}}
-              {{$isBooked := $.IsBooked $user $date}}
-              <td class="text-center">
-                <input 
-                  type="checkbox" 
-                  class="checkbox checkbox-sm checkbox-primary" 
-                  autocomplete="off" 
-                  name="{{concatUserDate $user $date}}" 
-                  {{if $isBooked }}checked{{end}} />
-              </td>
-              {{end}}
-            </tr>
+<div>
+  <h3 class="text-xl font-semibold text-sardinia-terracotta mb-6 pb-3 border-b border-sardinia-terracotta/10">Schedule & Availability</h3>
+  
+  {{if .Users}}
+  <form hx-post="/t/{{.Trip.Id}}/s" hx-target="#trip" hx-swap="innerHTML">
+    <div class="overflow-x-auto mb-6">
+      <table class="min-w-full">
+        <thead>
+          <tr class="bg-sardinia-turquoise/5">
+            <th class="px-4 py-3 text-left text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30">Date</th>
+            {{range .Users}}
+            <th class="px-4 py-3 text-center text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30">{{.Name}}</th>
             {{end}}
-          </tbody>
-        </table>
-      </div>
-      
-      <div class="card-actions justify-end">
-        <button class="btn btn-primary" type="submit">Update Schedule</button>
-      </div>
-    </form>
-    {{else}}
-    <div class="text-center py-8 text-gray-500">
-      <p>Add friends first to manage the schedule</p>
-      <p class="text-sm mt-2">Go to the Overview tab to add friends to this trip</p>
+          </tr>
+        </thead>
+        <tbody>
+          {{range $date := dateRange .Trip.StartDate .Trip.EndDate}}
+          <tr class="border-b border-sardinia-terracotta/10 hover:bg-sardinia-terracotta/5">
+            <td class="px-4 py-3 font-medium text-sardinia-terracotta">{{formatTime $date}}</td>
+            {{range $user := $.Users}}
+            {{$isBooked := $.IsBooked $user $date}}
+            <td class="px-4 py-3 text-center">
+              <input 
+                type="checkbox" 
+                class="w-4 h-4 text-sardinia-turquoise border-sardinia-terracotta/40 focus:ring-sardinia-turquoise focus:ring-2 rounded" 
+                autocomplete="off" 
+                name="{{concatUserDate $user $date}}" 
+                {{if $isBooked }}checked{{end}} />
+            </td>
+            {{end}}
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
     </div>
-    {{end}}
+    
+    <div class="flex justify-end">
+      <button class="px-6 py-2 bg-sardinia-turquoise text-white rounded-md hover:bg-sardinia-turquoise/90 focus:outline-none focus:ring-2 focus:ring-sardinia-turquoise focus:ring-offset-2 transition-colors" type="submit">Update Schedule</button>
+    </div>
+  </form>
+  {{else}}
+  <div class="text-center py-8 text-sardinia-terracotta/60">
+    <p>Add friends first to manage the schedule</p>
+    <p class="text-sm mt-2">Go to the Overview tab to add friends to this trip</p>
   </div>
+  {{end}}
 </div>
 {{end}}
 
 {{block "expenses" .}}
 <div class="space-y-6">
   <!-- Add Expense Card -->
-  <div class="card bg-base-100 shadow-sm border border-gray-200/70">
-    <div class="card-body">
-      <h3 class="card-title text-lg mb-4">Add New Expense</h3>
+  <div class="bg-white p-6 rounded-lg border border-sardinia-terracotta/20 shadow-sm">
+    <h3 class="text-xl font-semibold text-sardinia-terracotta mb-6 pb-3 border-b border-sardinia-terracotta/10">Add New Expense</h3>
       
       {{if .Users}}
       <form hx-post="/t/{{.Trip.Id}}/e" hx-target="#trip" hx-swap="innerHTML">
         <div class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Description</span>
-              </label>
+            <div>
+              <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Description</label>
               <input 
                 type="text" 
-                class="input input-bordered w-full" 
+                class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50" 
                 name="description" 
                 placeholder="Enter description" 
                 required />
             </div>
 
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Amount</span>
-              </label>
+            <div>
+              <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Amount</label>
               <input 
                 type="number" 
-                class="input input-bordered w-full" 
+                class="w-full px-3 py-2 border border-sardinia-sand/50 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-transparent" 
                 name="amount" 
                 placeholder="0.00" 
                 min="0.01" 
@@ -249,23 +243,19 @@
                 required />
             </div>
 
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Date</span>
-              </label>
+            <div>
+              <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Date</label>
               <input 
                 type="date" 
-                class="input input-bordered w-full" 
+                class="w-full px-3 py-2 border border-sardinia-sand/50 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-transparent" 
                 name="date" 
                 value="{{formatTime now}}" 
                 required />
             </div>
 
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Who paid?</span>
-              </label>
-              <select name="paidBy" class="select select-bordered w-full" required>
+            <div>
+              <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Who paid?</label>
+              <select name="paidBy" class="w-full px-3 py-2 border border-sardinia-sand/50 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-transparent" required>
                 <option value="">Select person</option>
                 {{range .Users}}
                 <option value="{{.Id}}">{{.Name}}</option>
@@ -274,31 +264,29 @@
             </div>
           </div>
 
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Split among</span>
-            </label>
-            <div class="flex flex-wrap gap-3">
+          <div>
+            <label class="block text-sm font-medium text-sardinia-terracotta mb-3">Split among</label>
+            <div class="flex flex-wrap gap-4">
               {{range .Users}}
-              <label class="label cursor-pointer">
+              <label class="flex items-center cursor-pointer">
                 <input 
                   type="checkbox" 
                   name="participants" 
                   value="{{.Id}}" 
-                  class="checkbox checkbox-primary checkbox-sm mr-2" />
-                <span class="label-text">{{.Name}}</span>
+                  class="w-4 h-4 text-sardinia-turquoise border-sardinia-terracotta/40 focus:ring-sardinia-turquoise focus:ring-2 rounded mr-2" />
+                <span class="text-sardinia-terracotta">{{.Name}}</span>
               </label>
               {{end}}
             </div>
           </div>
 
-          <div class="card-actions justify-end">
-            <button class="btn btn-primary" type="submit">Add Expense</button>
+          <div class="flex justify-end">
+            <button class="px-6 py-2 bg-sardinia-turquoise text-white rounded-md hover:bg-sardinia-turquoise/90 focus:outline-none focus:ring-2 focus:ring-sardinia-turquoise focus:ring-offset-2 transition-colors" type="submit">Add Expense</button>
           </div>
         </div>
       </form>
       {{else}}
-      <div class="text-center py-6 text-gray-500">
+      <div class="text-center py-6 text-sardinia-terracotta/60">
         <p>Add friends first to track expenses</p>
         <p class="text-sm mt-2">Go to the Overview tab to add friends to this trip</p>
       </div>
@@ -307,48 +295,46 @@
   </div>
 
   <!-- Expenses List Card -->
-  <div class="card bg-base-100 shadow-sm border border-gray-200/70">
-    <div class="card-body">
-      <h3 class="card-title text-lg mb-4">Expense History</h3>
-      
-      {{if .Expenses}}
-      <div class="overflow-x-auto">
-        <table class="table table-zebra">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th class="text-right">Amount</th>
-              <th class="text-right">Paid By</th>
-              <th class="text-right">Participants</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{range .Expenses}}
-            <tr>
-              <td class="font-medium">{{formatTime .Date}}</td>
-              <td>{{.Description}}</td>
-              <td class="text-right font-mono">${{.Amount}}</td>
-              <td class="text-right">{{.PaidBy.Name}}</td>
-              <td class="text-right">
-                <div class="text-sm">
-                  {{range $i, $participant := .Participants}}
-                    {{if $i}}, {{end}}{{$participant.Name}}
-                  {{end}}
-                </div>
-              </td>
-            </tr>
-            {{end}}
-          </tbody>
-        </table>
-      </div>
-      {{else}}
-      <div class="text-center py-8 text-gray-500">
-        <p>No expenses recorded yet</p>
-        <p class="text-sm mt-2">Add your first expense above to get started</p>
-      </div>
-      {{end}}
+  <div class="bg-white p-6 rounded-lg border border-sardinia-terracotta/20 shadow-sm">
+    <h3 class="text-xl font-semibold text-sardinia-terracotta mb-6 pb-3 border-b border-sardinia-terracotta/10">Expense History</h3>
+    
+    {{if .Expenses}}
+    <div class="overflow-x-auto">
+      <table class="min-w-full">
+        <thead>
+          <tr class="bg-sardinia-turquoise/5">
+            <th class="px-4 py-3 text-left text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30">Date</th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30">Description</th>
+            <th class="px-4 py-3 text-right text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30">Amount</th>
+            <th class="px-4 py-3 text-right text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30">Paid By</th>
+            <th class="px-4 py-3 text-right text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30">Participants</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .Expenses}}
+          <tr class="border-b border-sardinia-turquoise/10 hover:bg-sardinia-turquoise/5">
+            <td class="px-4 py-3 font-medium text-sardinia-terracotta">{{formatTime .Date}}</td>
+            <td class="px-4 py-3 text-sardinia-terracotta">{{.Description}}</td>
+            <td class="px-4 py-3 text-right font-mono text-sardinia-terracotta">${{.Amount}}</td>
+            <td class="px-4 py-3 text-right text-sardinia-terracotta">{{.PaidBy.Name}}</td>
+            <td class="px-4 py-3 text-right">
+              <div class="text-sm text-sardinia-terracotta">
+                {{range $i, $participant := .Participants}}
+                  {{if $i}}, {{end}}{{$participant.Name}}
+                {{end}}
+              </div>
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
     </div>
+    {{else}}
+    <div class="text-center py-8 text-sardinia-terracotta/60">
+      <p>No expenses recorded yet</p>
+      <p class="text-sm mt-2">Add your first expense above to get started</p>
+    </div>
+    {{end}}
   </div>
 </div>
 {{end}}
