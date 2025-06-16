@@ -1,0 +1,7 @@
+# Soko Development Configuration
+
+# Database configuration
+DB_PATH=data/dev.sqlite
+
+# Server configuration
+PORT=8080
