@@ -5,28 +5,20 @@
     <title>tripwiser</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script defer type="text/javascript" src="/static/js/alpinejs_3_14_1.min.js"></script>
+    <script src="/static/js/sardinia-theme.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+      // Use shared Sardinia theme configuration
       tailwind.config = {
         theme: {
           extend: {
-            colors: {
-              'sardinia': {
-                'orange': '#f6b55f',
-                'turquoise': '#20B2AA', 
-                'purple': '#9370DB',
-                'terracotta': '#A0522D',
-                'cream': '#FDF5E6',
-                'sand': '#F4A460',
-                'sage': '#9CAF88',
-                'blue': '#4682B4'
-              }
-            }
+            colors: window.SardiniaTheme.colors
           }
         }
       }
     </script>
+    <script type="text/javascript" src="/static/js/schedule-manager.js"></script>
+    <script defer type="text/javascript" src="/static/js/alpinejs_3_14_1.min.js"></script>
     <script type="text/javascript" src="/static/js/htmx_1_9_12.min.js"></script>
   </head>
   <body class="bg-sardinia-cream text-sardinia-terracotta min-h-screen">
@@ -162,33 +154,66 @@
 {{end}}
 
 {{block "schedule" .}}
-<div>
-  <h3 class="text-xl font-semibold text-sardinia-terracotta mb-6 pb-3 border-b border-sardinia-terracotta/10">Schedule & Availability</h3>
+<div x-data="scheduleManager()">
+  <div class="flex items-center justify-between mb-6 pb-3 border-b border-sardinia-terracotta/10">
+    <h3 class="text-xl font-semibold text-sardinia-terracotta">Schedule & Availability</h3>
+    <div class="flex items-center space-x-2 text-sm">
+      <div x-show="saving" class="flex items-center text-sardinia-turquoise">
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Saving...
+      </div>
+      <div x-show="savedRecently" x-transition class="flex items-center text-green-600">
+        <svg class="mr-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+        </svg>
+        Saved
+      </div>
+    </div>
+  </div>
   
   {{if .Users}}
   <form hx-post="/t/{{.Trip.Id}}/s" hx-target="#trip" hx-swap="innerHTML">
-    <div class="overflow-x-auto mb-6">
-      <table class="min-w-full">
+    <div class="overflow-x-auto mb-6 -mx-4 px-4 md:mx-0 md:px-0">
+      <table class="min-w-full table-fixed md:table-auto"
+             style="min-width: 640px;">
         <thead>
           <tr class="bg-sardinia-turquoise/5">
-            <th class="px-4 py-3 text-left text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30">Date</th>
-            {{range .Users}}
-            <th class="px-4 py-3 text-center text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30">{{.Name}}</th>
+            <th class="w-32 md:w-auto px-4 py-3 text-left text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30">Date</th>
+            {{range $userIndex, $user := .Users}}
+            <th class="w-24 md:w-auto px-2 md:px-4 py-3 text-center text-xs md:text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30 cursor-pointer hover:bg-sardinia-turquoise/10 transition-colors touch-manipulation" 
+                @click="toggleUserColumn('{{$user.Id}}')"
+                title="Click to toggle all days for {{$user.Name}}">
+              <div class="truncate">{{$user.Name}}</div>
+              <div class="text-xs text-sardinia-terracotta/60 mt-1 hidden md:block">tap to toggle</div>
+              <div class="text-xs text-sardinia-terracotta/60 mt-1 md:hidden">tap</div>
+            </th>
             {{end}}
           </tr>
         </thead>
         <tbody>
-          {{range $date := dateRange .Trip.StartDate .Trip.EndDate}}
+          {{range $dateIndex, $date := dateRange .Trip.StartDate .Trip.EndDate}}
           <tr class="border-b border-sardinia-terracotta/10 hover:bg-sardinia-terracotta/5">
-            <td class="px-4 py-3 font-medium text-sardinia-terracotta">{{formatTime $date}}</td>
+            <td class="px-4 py-3 font-medium text-sardinia-terracotta cursor-pointer hover:bg-sardinia-turquoise/10 transition-colors touch-manipulation" 
+                @click="toggleDateRow('{{formatTime $date}}')"
+                title="Click to toggle {{formatTime $date}} for all users">
+              <div class="text-sm md:text-base">{{formatTime $date}}</div>
+              <div class="text-xs text-sardinia-terracotta/60 hidden md:block">tap to toggle</div>
+              <div class="text-xs text-sardinia-terracotta/60 md:hidden">tap</div>
+            </td>
             {{range $user := $.Users}}
             {{$isBooked := $.IsBooked $user $date}}
-            <td class="px-4 py-3 text-center">
+            <td class="px-2 md:px-4 py-3 text-center">
               <input 
                 type="checkbox" 
-                class="w-4 h-4 text-sardinia-turquoise border-sardinia-terracotta/40 focus:ring-sardinia-turquoise focus:ring-2 rounded" 
+                class="w-6 h-6 md:w-4 md:h-4 text-sardinia-turquoise border-sardinia-terracotta/40 focus:ring-sardinia-turquoise focus:ring-2 rounded touch-manipulation" 
                 autocomplete="off" 
                 name="{{concatUserDate $user $date}}" 
+                data-user-id="{{$user.Id}}"
+                data-date="{{formatTime $date}}"
+                @change="scheduleChanged()"
                 {{if $isBooked }}checked{{end}} />
             </td>
             {{end}}
@@ -198,9 +223,6 @@
       </table>
     </div>
     
-    <div class="flex justify-end">
-      <button class="px-6 py-2 bg-sardinia-turquoise text-white rounded-md hover:bg-sardinia-turquoise/90 focus:outline-none focus:ring-2 focus:ring-sardinia-turquoise focus:ring-offset-2 transition-colors" type="submit">Update Schedule</button>
-    </div>
   </form>
   {{else}}
   <div class="text-center py-8 text-sardinia-terracotta/60">
@@ -338,3 +360,4 @@
   </div>
 </div>
 {{end}}
+
