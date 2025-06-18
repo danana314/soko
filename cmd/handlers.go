@@ -150,12 +150,11 @@ func NewExpense(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Error(err.Error())
 	}
-
 	expense := models.NewExpense()
-	
+
 	expense.Description = r.PostFormValue("description")
 	expense.Amount = r.PostFormValue("amount")
-	
+
 	dateStr := r.PostFormValue("date")
 	if dateStr != "" {
 		if expense.Date, err = time.Parse("2006-01-02", dateStr); err != nil {

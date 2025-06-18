@@ -42,7 +42,7 @@
           <a @click="setTab('2')" :class="{ 'bg-sardinia-orange text-white shadow-md' : tabSelected === '2' }" class="relative z-20 inline-flex items-center justify-center w-full h-10 px-4 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap text-sardinia-terracotta hover:bg-sardinia-terracotta/10 border border-transparent hover:border-sardinia-terracotta/20">Schedule</a>
           <a @click="setTab('3')" :class="{ 'bg-sardinia-orange text-white shadow-md' : tabSelected === '3' }" class="relative z-20 inline-flex items-center justify-center w-full h-10 px-4 font-medium transition-all rounded-md cursor-pointer whitespace-nowrap text-sardinia-terracotta hover:bg-sardinia-terracotta/10 border border-transparent hover:border-sardinia-terracotta/20">Expenses</a>
       </div>
-      
+
       <div class="relative w-full mt-4">
         <template x-if="tabSelected === '1'">
           <div class="p-6 bg-white border border-sardinia-terracotta/20 rounded-lg shadow-sm">
@@ -57,7 +57,7 @@
         </template>
 
         <template x-if="tabSelected === '3'">
-          <div class="p-6 bg-white border border-sardinia-terracotta/20 rounded-lg shadow-sm">
+          <div class="p-6 bg-white border border-sardinia-terracotta/20 rounded-lg shadow-sm" x-init="$nextTick(() => htmx.process($el))">
             {{ template "expenses" . }}
           </div>
         </template>
@@ -74,10 +74,10 @@
       <form class="space-y-4" hx-post="/t/{{.Trip.Id}}" hx-target="#trip" hx-swap="innerHTML">
         <div>
           <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Trip name</label>
-          <input 
-            type="text" 
-            name="TripName" 
-            class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50" 
+          <input
+            type="text"
+            name="TripName"
+            class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50"
             placeholder="Enter trip name"
             {{ if .Trip.Name }} value="{{ .Trip.Name }}" {{ end }} />
         </div>
@@ -85,18 +85,18 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Start date</label>
-            <input 
-              type="date" 
-              name="StartDate" 
+            <input
+              type="date"
+              name="StartDate"
               class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50"
               value="{{formatTime .Trip.StartDate}}" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-sardinia-terracotta mb-2">End date</label>
-            <input 
-              type="date" 
-              name="EndDate" 
+            <input
+              type="date"
+              name="EndDate"
               class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50"
               value="{{formatTime .Trip.EndDate}}" />
           </div>
@@ -112,15 +112,15 @@
   <!-- Friends Card -->
   <div class="bg-white p-6 rounded-lg border border-sardinia-terracotta/20 shadow-sm">
     <h3 class="text-xl font-semibold text-sardinia-terracotta mb-6 pb-3 border-b border-sardinia-terracotta/10">Friends</h3>
-      
+
       {{if .Users}}
       <div class="space-y-2 mb-4">
         {{range .Users}}
         <div class="flex items-center justify-between p-3 bg-sardinia-terracotta/5 border border-sardinia-terracotta/10 rounded-lg hover:bg-sardinia-terracotta/10 transition-colors">
           <span class="font-medium text-sardinia-terracotta">{{.Name}}</span>
-          <button 
-            hx-delete="/t/{{$.Trip.Id}}/u/{{.Id}}" 
-            hx-target="#trip" 
+          <button
+            hx-delete="/t/{{$.Trip.Id}}/u/{{.Id}}"
+            hx-target="#trip"
             hx-swap="innerHTML"
             hx-confirm="Remove {{.Name}} from this trip?"
             class="p-1 text-red-500 hover:bg-red-100 rounded transition-colors">
@@ -139,10 +139,10 @@
 
       <form hx-post="/t/{{.Trip.Id}}/u" hx-target="#trip" hx-swap="innerHTML">
         <div class="flex gap-2">
-          <input 
-            class="flex-1 px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50" 
-            type="text" 
-            name="name" 
+          <input
+            class="flex-1 px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50"
+            type="text"
+            name="name"
             placeholder="Add a friend"
             required />
           <button class="px-4 py-2 bg-sardinia-turquoise text-white rounded-md hover:bg-sardinia-turquoise/90 focus:outline-none focus:ring-2 focus:ring-sardinia-turquoise focus:ring-offset-2 transition-colors" type="submit">Add Friend</button>
@@ -173,7 +173,7 @@
       </div>
     </div>
   </div>
-  
+
   {{if .Users}}
   <form hx-post="/t/{{.Trip.Id}}/s" hx-target="#trip" hx-swap="innerHTML">
     <div class="overflow-x-auto mb-6 -mx-4 px-4 md:mx-0 md:px-0">
@@ -183,7 +183,7 @@
           <tr class="bg-sardinia-turquoise/5">
             <th class="w-32 md:w-auto px-4 py-3 text-left text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30">Date</th>
             {{range $userIndex, $user := .Users}}
-            <th class="w-24 md:w-auto px-2 md:px-4 py-3 text-center text-xs md:text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30 cursor-pointer hover:bg-sardinia-turquoise/10 transition-colors touch-manipulation" 
+            <th class="w-24 md:w-auto px-2 md:px-4 py-3 text-center text-xs md:text-sm font-medium text-sardinia-terracotta border-b border-sardinia-turquoise/30 cursor-pointer hover:bg-sardinia-turquoise/10 transition-colors touch-manipulation"
                 @click="toggleUserColumn('{{$user.Id}}')"
                 title="Click to toggle all days for {{$user.Name}}">
               <div class="truncate">{{$user.Name}}</div>
@@ -196,7 +196,7 @@
         <tbody>
           {{range $dateIndex, $date := dateRange .Trip.StartDate .Trip.EndDate}}
           <tr class="border-b border-sardinia-terracotta/10 hover:bg-sardinia-terracotta/5">
-            <td class="px-4 py-3 font-medium text-sardinia-terracotta cursor-pointer hover:bg-sardinia-turquoise/10 transition-colors touch-manipulation" 
+            <td class="px-4 py-3 font-medium text-sardinia-terracotta cursor-pointer hover:bg-sardinia-turquoise/10 transition-colors touch-manipulation"
                 @click="toggleDateRow('{{formatTime $date}}')"
                 title="Click to toggle {{formatTime $date}} for all users">
               <div class="text-sm md:text-base">{{formatTime $date}}</div>
@@ -206,11 +206,11 @@
             {{range $user := $.Users}}
             {{$isBooked := $.IsBooked $user $date}}
             <td class="px-2 md:px-4 py-3 text-center">
-              <input 
-                type="checkbox" 
-                class="w-6 h-6 md:w-4 md:h-4 text-sardinia-turquoise border-sardinia-terracotta/40 focus:ring-sardinia-turquoise focus:ring-2 rounded touch-manipulation" 
-                autocomplete="off" 
-                name="{{concatUserDate $user $date}}" 
+              <input
+                type="checkbox"
+                class="w-6 h-6 md:w-4 md:h-4 text-sardinia-turquoise border-sardinia-terracotta/40 focus:ring-sardinia-turquoise focus:ring-2 rounded touch-manipulation"
+                autocomplete="off"
+                name="{{concatUserDate $user $date}}"
                 data-user-id="{{$user.Id}}"
                 data-date="{{formatTime $date}}"
                 @change="scheduleChanged()"
@@ -222,7 +222,7 @@
         </tbody>
       </table>
     </div>
-    
+
   </form>
   {{else}}
   <div class="text-center py-8 text-sardinia-terracotta/60">
@@ -238,46 +238,46 @@
   <!-- Add Expense Card -->
   <div class="bg-white p-6 rounded-lg border border-sardinia-terracotta/20 shadow-sm">
     <h3 class="text-xl font-semibold text-sardinia-terracotta mb-6 pb-3 border-b border-sardinia-terracotta/10">Add New Expense</h3>
-      
+
       {{if .Users}}
-      <form hx-post="/t/{{.Trip.Id}}/e" hx-target="#trip" hx-swap="innerHTML">
+      <form method="post" hx-post="/t/{{.Trip.Id}}/e" hx-target="#trip" hx-swap="innerHTML">
         <div class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Description</label>
-              <input 
-                type="text" 
-                class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50" 
-                name="description" 
-                placeholder="Enter description" 
+              <input
+                type="text"
+                class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50"
+                name="description"
+                placeholder="Enter description"
                 required />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Amount</label>
-              <input 
-                type="number" 
-                class="w-full px-3 py-2 border border-sardinia-sand/50 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-transparent" 
-                name="amount" 
-                placeholder="0.00" 
-                min="0.01" 
-                step="0.01" 
+              <input
+                type="number"
+                class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50"
+                name="amount"
+                placeholder="0.00"
+                min="0.01"
+                step="0.01"
                 required />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Date</label>
-              <input 
-                type="date" 
-                class="w-full px-3 py-2 border border-sardinia-sand/50 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-transparent" 
-                name="date" 
-                value="{{formatTime now}}" 
+              <input
+                type="date"
+                class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50"
+                name="date"
+                value="{{formatTime now}}"
                 required />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Who paid?</label>
-              <select name="paidBy" class="w-full px-3 py-2 border border-sardinia-sand/50 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-transparent" required>
+              <select name="paidBy" class="w-full px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50" required>
                 <option value="">Select person</option>
                 {{range .Users}}
                 <option value="{{.Id}}">{{.Name}}</option>
@@ -291,10 +291,10 @@
             <div class="flex flex-wrap gap-4">
               {{range .Users}}
               <label class="flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  name="participants" 
-                  value="{{.Id}}" 
+                <input
+                  type="checkbox"
+                  name="participants"
+                  value="{{.Id}}"
                   class="w-4 h-4 text-sardinia-turquoise border-sardinia-terracotta/40 focus:ring-sardinia-turquoise focus:ring-2 rounded mr-2" />
                 <span class="text-sardinia-terracotta">{{.Name}}</span>
               </label>
@@ -303,7 +303,7 @@
           </div>
 
           <div class="flex justify-end">
-            <button class="px-6 py-2 bg-sardinia-turquoise text-white rounded-md hover:bg-sardinia-turquoise/90 focus:outline-none focus:ring-2 focus:ring-sardinia-turquoise focus:ring-offset-2 transition-colors" type="submit">Add Expense</button>
+            <button type="submit" class="px-6 py-2 bg-sardinia-turquoise text-white rounded-md hover:bg-sardinia-turquoise/90 focus:outline-none focus:ring-2 focus:ring-sardinia-turquoise focus:ring-offset-2 transition-colors">Add Expense</button>
           </div>
         </div>
       </form>
@@ -319,7 +319,7 @@
   <!-- Expenses List Card -->
   <div class="bg-white p-6 rounded-lg border border-sardinia-terracotta/20 shadow-sm">
     <h3 class="text-xl font-semibold text-sardinia-terracotta mb-6 pb-3 border-b border-sardinia-terracotta/10">Expense History</h3>
-    
+
     {{if .Expenses}}
     <div class="overflow-x-auto">
       <table class="min-w-full">
@@ -360,4 +360,3 @@
   </div>
 </div>
 {{end}}
-
