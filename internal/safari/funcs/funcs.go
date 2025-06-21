@@ -1,7 +1,7 @@
 package funcs
 
 import (
-	"1008001/splitwiser/internal/models"
+	"1008001/soko/internal/safari/models"
 	"bytes"
 	"fmt"
 	"html/template"

@@ -1,7 +1,7 @@
 package store
 
 import (
-	"1008001/splitwiser/internal/models"
+	"1008001/soko/internal/safari/models"
 	"time"
 )
 

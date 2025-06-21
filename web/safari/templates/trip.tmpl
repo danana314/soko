@@ -5,7 +5,7 @@
     <title>tripwiser</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/static/js/sardinia-theme.js"></script>
+    <script src="/safari/static/js/sardinia-theme.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       // Use shared Sardinia theme configuration
@@ -17,9 +17,9 @@
         }
       }
     </script>
-    <script type="text/javascript" src="/static/js/schedule-manager.js"></script>
-    <script defer type="text/javascript" src="/static/js/alpinejs_3_14_1.min.js"></script>
-    <script type="text/javascript" src="/static/js/htmx_1_9_12.min.js"></script>
+    <script type="text/javascript" src="/safari/static/js/schedule-manager.js"></script>
+    <script defer type="text/javascript" src="/safari/static/js/alpinejs_3_14_1.min.js"></script>
+    <script type="text/javascript" src="/safari/static/js/htmx_1_9_12.min.js"></script>
   </head>
   <body class="bg-sardinia-cream text-sardinia-terracotta min-h-screen">
     {{template "trip_detail" .}}
@@ -71,7 +71,7 @@
   <!-- Trip Details Card -->
   <div class="bg-white p-6 rounded-lg border border-sardinia-terracotta/20 shadow-sm">
     <h3 class="text-xl font-semibold text-sardinia-terracotta mb-6 pb-3 border-b border-sardinia-terracotta/10">Trip Details</h3>
-      <form class="space-y-4" hx-post="/t/{{.Trip.Id}}" hx-target="#trip" hx-swap="innerHTML">
+      <form class="space-y-4" hx-post="/safari/t/{{.Trip.Id}}" hx-target="#trip" hx-swap="innerHTML">
         <div>
           <label class="block text-sm font-medium text-sardinia-terracotta mb-2">Trip name</label>
           <input
@@ -119,7 +119,7 @@
         <div class="flex items-center justify-between p-3 bg-sardinia-terracotta/5 border border-sardinia-terracotta/10 rounded-lg hover:bg-sardinia-terracotta/10 transition-colors">
           <span class="font-medium text-sardinia-terracotta">{{.Name}}</span>
           <button
-            hx-delete="/t/{{$.Trip.Id}}/u/{{.Id}}"
+            hx-delete="/safari/t/{{$.Trip.Id}}/u/{{.Id}}"
             hx-target="#trip"
             hx-swap="innerHTML"
             hx-confirm="Remove {{.Name}} from this trip?"
@@ -137,7 +137,7 @@
       </div>
       {{end}}
 
-      <form hx-post="/t/{{.Trip.Id}}/u" hx-target="#trip" hx-swap="innerHTML">
+      <form hx-post="/safari/t/{{.Trip.Id}}/u" hx-target="#trip" hx-swap="innerHTML">
         <div class="flex gap-2">
           <input
             class="flex-1 px-3 py-2 border border-sardinia-terracotta/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sardinia-orange focus:border-sardinia-terracotta/50"
@@ -175,7 +175,7 @@
   </div>
 
   {{if .Users}}
-  <form hx-post="/t/{{.Trip.Id}}/s" hx-target="#trip" hx-swap="innerHTML">
+  <form hx-post="/safari/t/{{.Trip.Id}}/s" hx-target="#trip" hx-swap="innerHTML">
     <div class="overflow-x-auto mb-6 -mx-4 px-4 md:mx-0 md:px-0">
       <table class="min-w-full table-fixed md:table-auto"
              style="min-width: 640px;">
@@ -240,7 +240,7 @@
     <h3 class="text-xl font-semibold text-sardinia-terracotta mb-6 pb-3 border-b border-sardinia-terracotta/10">Add New Expense</h3>
 
       {{if .Users}}
-      <form method="post" hx-post="/t/{{.Trip.Id}}/e" hx-target="#trip" hx-swap="innerHTML">
+      <form method="post" hx-post="/safari/t/{{.Trip.Id}}/e" hx-target="#trip" hx-swap="innerHTML">
         <div class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>

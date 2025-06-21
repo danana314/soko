@@ -1,7 +1,7 @@
 package models
 
 import (
-	"1008001/splitwiser/internal/util"
+	"1008001/soko/internal/safari/util"
 	"fmt"
 	"strings"
 	"time"

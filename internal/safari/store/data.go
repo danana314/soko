@@ -1,8 +1,8 @@
 package store
 
 import (
-	"1008001/splitwiser/internal/models"
-	"1008001/splitwiser/internal/util"
+	"1008001/soko/internal/safari/models"
+	"1008001/soko/internal/safari/util"
 	_ "embed"
 	"encoding/json"
 	"fmt"

@@ -1,10 +1,10 @@
-package main
+package safari
 
 import (
-	"1008001/splitwiser/internal/funcs"
-	"1008001/splitwiser/internal/models"
-	"1008001/splitwiser/internal/store"
-	"1008001/splitwiser/web"
+	"1008001/soko/internal/safari/funcs"
+	"1008001/soko/internal/safari/models"
+	"1008001/soko/internal/safari/store"
+	"1008001/soko/web/safari"
 	"fmt"
 	"html/template"
 	"log/slog"
@@ -39,14 +39,14 @@ func init() {
 	decoder.RegisterConverter(time.Time{}, timeConverter)
 	// var templates = template.Must(template.ParseGlob("web/templates/*.tmpl")).Funcs(funcs.TemplateFuncs)
 	var err error
-	templates, err = template.New("").Funcs(funcs.TemplateFuncs).ParseFS(web.EmbeddedFiles, "templates/*.tmpl")
+	templates, err = template.New("").Funcs(funcs.TemplateFuncs).ParseFS(safari.EmbeddedFiles, "templates/*.tmpl")
 	if err != nil {
 		slog.Error(err.Error())
 	}
 }
 
 func routes() http.Handler {
-	fileServer := http.FileServer(http.FS(web.EmbeddedFiles))
+	fileServer := http.FileServer(http.FS(safari.EmbeddedFiles))
 	router.Handle("GET /static/", fileServer)
 
 	router.HandleFunc("GET /{$}", Index)
@@ -71,7 +71,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func NewTrip(w http.ResponseWriter, r *http.Request) {
 	trip := models.NewTrip()
 	store.SaveTrip(trip)
-	http.Redirect(w, r, fmt.Sprintf("/t/%s", trip.Id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/safari/t/%s", trip.Id), http.StatusSeeOther)
 }
 
 func GetTrip(w http.ResponseWriter, r *http.Request) {
