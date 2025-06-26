@@ -1,7 +1,0 @@
-# Soko Development Configuration
-
-# Database configuration
-SAFARI_DB_PATH=data/safari.sqlite
-
-# Server configuration
-PORT=8080

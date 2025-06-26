@@ -18,7 +18,7 @@ func main() {
 		env = "development"
 	}
 	
-	envFile := fmt.Sprintf(".env/%s", env)
+	envFile := fmt.Sprintf(".env.%s", env)
 	godotenv.Load(envFile)
 	
 	// Get port from environment variable

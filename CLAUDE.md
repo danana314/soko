@@ -27,6 +27,8 @@ This is a monorepo called "Soko" containing multiple Go applications served via 
 - **Run**: `make run` (builds and runs server on localhost:8080)
 - **Run with hot reload**: `make run/live`
 - **Test**: `go test ./...`
+- **Build for Linux**: `make build-linux` (for deployment)
+- **Deploy**: `make deploy` (runs deploy.sh script)
 - **Database**: SQLite files in `data/` directory (DO NOT delete - contains user data)
 
 ## Database Schema (Safari App)
@@ -53,7 +55,7 @@ This is a monorepo called "Soko" containing multiple Go applications served via 
 
 ## Important Notes
 - Database files in `data/` contain user data - never delete them
-- Environment variables are loaded from `.env/development` or `.env/production` via godotenv
+- Environment variables are loaded from `.env.development` or `.env.production` via godotenv
 - Safari app is accessible at `http://localhost:8080/safari/`
 - Root path `/` redirects to Safari app
 - Expense amounts are stored as strings for precise decimal handling
@@ -70,3 +72,15 @@ To add a new app to the monorepo:
 3. Create `web/newapp/` with templates and static files
 4. Register the app in `cmd/server/main.go` with subdirectory routing
 5. Add environment variables for the new app's database
+
+## Deployment (Simple Binary + Caddy)
+The app uses a simple deployment approach:
+- **Architecture**: Internet → Caddy (80/443) → Go Binary (8080) → SQLite File
+- **Deploy command**: `make deploy` builds and deploys to server
+- **Configuration**: Update `SERVER_HOST` in Makefile with your server IP
+- **Reverse proxy**: Caddy handles SSL, compression, security headers
+- **Process manager**: systemd manages the Go binary as a service
+- **Database**: SQLite file at `/var/lib/soko/safari.sqlite` on server
+- **Logs**: `sudo journalctl -u soko -f`
+
+See `DEPLOY.md` for complete setup instructions.

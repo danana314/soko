@@ -1,0 +1,34 @@
+# Soko Caddyfile - Simple reverse proxy configuration
+# Replace yourdomain.com with your actual domain
+
+1008001.xyz {
+    # Reverse proxy to Go application
+    reverse_proxy localhost:8080
+
+    # Security headers
+    header {
+        # Enable HSTS
+        Strict-Transport-Security max-age=31536000;
+        # Prevent MIME sniffing
+        X-Content-Type-Options nosniff
+        # Prevent clickjacking
+        X-Frame-Options DENY
+        # XSS protection
+        X-XSS-Protection "1; mode=block"
+        # Don't reveal server info
+        -Server
+    }
+
+    # Enable compression
+    encode gzip
+
+    # Logging
+    log {
+        output file /var/log/caddy/soko.log
+    }
+}
+
+# Redirect www to non-www (optional)
+www.1008001.xyz {
+    redir https://1008001.xyz{uri} permanent
+}

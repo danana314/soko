@@ -62,3 +62,41 @@ run/live:
 		--build.exclude_dir "" \
 		--build.include_ext "go, tpl, tmpl, html, css, scss, js, ts, sql, jpeg, jpg, gif, png, bmp, svg, webp, ico" \
 		--misc.clean_on_exit "true"
+
+
+# ==================================================================================== #
+# DEPLOYMENT
+# ==================================================================================== #
+
+# Deployment configuration - update these for your server
+SERVER_USER = deploy
+SERVER_HOST = your-server-ip
+APP_NAME = soko
+REMOTE_DIR = /opt/soko
+
+## build-linux: build binary for Linux deployment
+.PHONY: build-linux
+build-linux:
+	GOOS=linux GOARCH=amd64 go build -o $(APP_NAME)-linux ./cmd/server
+
+## deploy: deploy application to production server
+.PHONY: deploy
+deploy: build-linux
+	@echo "🚀 Deploying Soko to production..."
+	@echo "⬆️  Uploading files to server..."
+	scp $(APP_NAME)-linux $(SERVER_USER)@$(SERVER_HOST):$(REMOTE_DIR)/$(APP_NAME)
+	scp .env.production $(SERVER_USER)@$(SERVER_HOST):$(REMOTE_DIR)/.env.production
+	scp Caddyfile $(SERVER_USER)@$(SERVER_HOST):/tmp/Caddyfile
+	@echo "🔄 Restarting services on server..."
+	ssh $(SERVER_USER)@$(SERVER_HOST) '\
+		sudo mkdir -p /var/lib/soko && \
+		sudo chown deploy:deploy /var/lib/soko && \
+		sudo chmod +x $(REMOTE_DIR)/$(APP_NAME) && \
+		sudo mv /tmp/Caddyfile /etc/caddy/Caddyfile && \
+		sudo systemctl restart $(APP_NAME) && \
+		sudo systemctl restart caddy && \
+		sudo systemctl status $(APP_NAME) --no-pager && \
+		sudo systemctl status caddy --no-pager'
+	rm $(APP_NAME)-linux
+	@echo "✅ Deployment complete!"
+	@echo "🌐 Your app should be available at https://1008001.xyz/safari/"

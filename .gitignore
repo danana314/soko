@@ -22,7 +22,7 @@
 /data/
 
 # Environment files
-.env/production
+.env.production
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
